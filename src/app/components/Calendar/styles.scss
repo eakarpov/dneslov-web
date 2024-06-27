@@ -1,0 +1,142 @@
+.calendar-wrapper {
+    width: 300px;
+    padding: 10px;
+}
+
+.calendar-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    background: #ee6e73;
+    height: 29px;
+
+    & > div {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;;
+    }
+}
+
+.calendar-active {
+    background: #c5171e;
+}
+
+.calendar-date-header {
+    display: flex;
+    flex-direction: row;
+    height: 34px;
+    background: #ee6e73;
+    align-items: center;
+}
+
+.calendar-month {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-week-days {
+    background: #f79eb3;
+    height: 26px;
+    display: flex;
+    flex-direction: row;
+
+    & > div {
+        width: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.calendar-week {
+    display: flex;
+    flex-direction: row;
+}
+
+.calendar-day-is-today {
+    background: #afeeee;
+}
+
+.calendar-day-is-active {
+    background: #00bfff;
+}
+
+.calendar-day-is-fasting {
+    background: #ca80f2;
+}
+
+.calendar-day-is-easter {
+    background: crimson;
+}
+
+.calendar-day-not-current-month {
+    color: grey;
+}
+
+.calendar-day {
+    width: 40px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    & > span {
+        display: flex;
+        padding: 0;
+        margin: 0;
+    }
+
+    & > .secondary {
+        font-size: 8px;
+    }
+}
+
+.calendar-chevron {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.calendar-yesterday-tomorrow {
+    display: flex;
+    flex-direction: row;
+    height: 34px;
+    background: #ee6e73;
+    align-items: center;
+    justify-content: space-between;
+
+    & > div {
+        cursor: pointer;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+.calendar-settings {
+    display: flex;
+    flex-direction: row;
+    height: 34px;
+    background: #ee6e73;
+    align-items: center;
+    padding: 5px;
+}
+
+.calendar-settings-name {
+    display: flex;
+    flex: 1;
+    align-items: center;
+}
+
+.calendar-settings-icon {
+    height: 24px;
+    width: 24px;
+    cursor: pointer;
+}

@@ -1,0 +1,41 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+.navbar {
+  background: #ee6e73;
+}
+
+.chip {
+  border-radius: 2rem;
+  color: rgba(47,16,95,0.6);
+  font-size: 90%;
+  height: auto;
+  line-height: 230%;
+  margin: 0.2rem;
+  padding: 0 0.8rem;
+  background: #e4e4e4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

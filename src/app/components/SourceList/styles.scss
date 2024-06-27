@@ -1,0 +1,22 @@
+.source-list {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 10px;
+  row-gap: 10px;
+  max-width: 400px;
+  max-height: 400px;
+  overflow-y: scroll;
+}
+
+.source-item {
+  background: #f0f8ff;
+  padding-left: 10px;
+  padding-right: 12px;
+  border-radius: 6px;
+  height: fit-content;
+  cursor: pointer;
+}
+
+.source-item-is-active {
+  background: #039be5;
+}
