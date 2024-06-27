@@ -1,0 +1,11 @@
+[Unit]
+Description=Dneslov Web
+
+[Service]
+ExecStart=npm start --prefix /var/www/dneslov-web -- -p 3000
+Restart=on-failure
+User=_nginx
+WorkingDirectory=/var/www/dneslov-web
+
+[Install]
+WantedBy=multi-user.target
