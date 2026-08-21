@@ -6,7 +6,7 @@ import AudioPlayer from "../../../components/AudioPlayer";
 import {IEvent} from "../../../../dto/event";
 import {getEventTitle} from "../../../../lib/events";
 import {getScriptumTitle, sortScripta} from "../../../../lib/liturgical";
-import "../content.scss";
+import "../../../common/content.scss";
 
 interface EventPageProps {
     event?: IEvent;

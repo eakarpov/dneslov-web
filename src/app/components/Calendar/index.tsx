@@ -88,6 +88,16 @@ const Calendar = () => {
         }
     }, [calendaries]);
 
+    // Defaults the selection to today (in the currently active calendar style) once mounted,
+    // instead of baking a concrete date into the SSR'd initial state (see Redux initialState —
+    // that caused a hydration mismatch since server/client would compute "now" at different times).
+    useEffect(() => {
+        if (dateValue.value === undefined) {
+            dispatch(slice.actions.UpdateDateValue(dateToday.valueOf()));
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     return (
         <div className="calendar-wrapper">
             <div className="calendar-header">
@@ -146,9 +156,10 @@ const Calendar = () => {
                 )}
             </div>
             {weekArray.map(week => (
-                <div className="calendar-week">
+                <div className="calendar-week" key={week[0].dateJs.valueOf()}>
                     {week.map(day => (
                         <div
+                            key={day.dateJs.valueOf()}
                             onClick={onGoToDate(day)}
                             className={
                                 `calendar-day ${

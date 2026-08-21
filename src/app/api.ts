@@ -1,15 +1,15 @@
 import {CALENDAR_TYPE} from "../types/index";
-import {buildLegacyApiUrl} from "../lib/api/host";
+import {fetchLegacyJson} from "../lib/api/host";
 
 export const getItemsLocal = async (dateTime: string, calendarType: CALENDAR_TYPE, calendarString: string, search: string) => {
     return fetch(`/api/v1?${encodeURIComponent(
-        `${calendarType === CALENDAR_TYPE.JULIAN ? `ю` : 'н'}${dateTime}&c=${calendarString}&q=${search}`
+        `d=${calendarType === CALENDAR_TYPE.JULIAN ? `ю` : 'н'}${dateTime}&c=${calendarString}&q=${search}`
     )}`).then(res => res.json()).catch((e) => console.log(e));
 };
 
 const getItems = async (dateTime: string, calendarType: CALENDAR_TYPE, calendarString: string) => {
-    return fetch(`${buildLegacyApiUrl('/index.json')}?d=${calendarType === CALENDAR_TYPE.JULIAN ? `ю` : 'н'}${dateTime}&c=${calendarString}`)
-        .then(res => res.json()).catch(e => console.log(e));
+    return fetchLegacyJson(`/index.json?d=${calendarType === CALENDAR_TYPE.JULIAN ? `ю` : 'н'}${dateTime}&c=${calendarString}`)
+        .catch(e => console.log(e));
 };
 
 export const getItemsBatch = async (dateTime: string, calendarString: string, from: number, to: number) => {
@@ -32,7 +32,7 @@ export const getCalendariesLocal = (page, count) => {
 
 export const getCalendaries = async (page, count) => {
     // return Promise.resolve(['рпц', 'нмр', 'днес']);
-    return fetch(`${buildLegacyApiUrl('/calendaries.json')}?page=${page}&per=${count}&l=true`).then(res => res.json());
+    return fetchLegacyJson(`/calendaries.json?page=${page}&per=${count}&l=true`);
 }
 
 export default getItems;

@@ -65,7 +65,8 @@
   white-space: pre-line;
 }
 
-.memory-events {
+.memory-events,
+.item-list {
   display: flex;
   flex-direction: column;
   gap: 0.4rem;

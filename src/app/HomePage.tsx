@@ -1,5 +1,5 @@
 'use client';
-import {List, InfiniteLoader} from "react-virtualized";
+import {AutoSizer, List, InfiniteLoader} from "react-virtualized";
 import {memo, useRef, useState, useEffect, useCallback} from "react";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import {getItemsBatch, getItemsLocal} from "./api";
@@ -67,21 +67,26 @@ const HomePage = ({ items, dateTime, calendaries }: any) => {
             );
         }
         if (loadedRowsMap[index] === STATUS.STATUS_LOADED) {
+            const item = dataRowsMap[index];
+            const title = item?.happened_at ? `${item?.title} (${item.happened_at})` : item?.title;
+
             content = (
                 <>
-                    <div className="chip">
-                        {dataRowsMap[index]?.orders && Object.values(dataRowsMap[index].orders)[0]}
+                    <div className="home-row-chip">
+                        <div className="chip">
+                            {item?.orders && Object.values(item.orders)[0]}
+                        </div>
                     </div>
-                    <span>
-                        <Link href={`memory/${dataRowsMap[index]?.slug}`}>
-                            {dataRowsMap[index]?.title}
+                    <div className="home-row-title">
+                        <Link href={`memory/${item?.slug}`} title={title}>
+                            {title}
                         </Link>
-                    </span>
+                    </div>
                 </>
             );
         }
         return (
-            <div className="flex" key={key} style={style}>
+            <div className="home-row" key={key} style={style}>
                 {content}
             </div>
         )
@@ -222,7 +227,7 @@ const HomePage = ({ items, dateTime, calendaries }: any) => {
             <div>
                 Выборка:
             </div>
-            {dateValue.value && (
+            {frontInit && dateValue.value && (
                 <div className="chip selection-date">
                     {dayjs(dateValue.value).format(`DD.MM.YYYY`)}
                     <div onClick={onClearDate}>
@@ -230,8 +235,8 @@ const HomePage = ({ items, dateTime, calendaries }: any) => {
                     </div>
                 </div>
             )}
-            {pickedCalendaries.map((calendar) => (
-                <div className="chip selection-date">
+            {frontInit && pickedCalendaries.map((calendar) => (
+                <div className="chip selection-date" key={calendar.id}>
                     {calendar.titles && calendar.titles[0].text}
                     <div onClick={onClearCategory(calendar)}>
                         <XMarkIcon />
@@ -239,27 +244,31 @@ const HomePage = ({ items, dateTime, calendaries }: any) => {
                 </div>
             ))}
         </div>
-        <InfiniteLoader
-            isRowLoaded={isRowLoaded}
-            loadMoreRows={loadMoreRows}
-            rowCount={total}
-        >
-            {({ onRowsRendered, registerChild }) => (
-                // <AutoSizer ref={registerChild}>
-                //     {({ width, height }) => (
-                        <List
-                            ref={registerChild}
-                            height={600}
-                            onRowsRendered={onRowsRendered}
-                            rowCount={total}
-                            rowHeight={30}
-                            rowRenderer={rowRenderer}
-                            width={600}
-                        />
-                    // )}
-                // </AutoSizer>
-            )}
-        </InfiniteLoader>
+        {frontInit ? (
+            <InfiniteLoader
+                isRowLoaded={isRowLoaded}
+                loadMoreRows={loadMoreRows}
+                rowCount={total}
+            >
+                {({ onRowsRendered, registerChild }) => (
+                    <AutoSizer disableHeight className="home-list">
+                        {({ width }) => (
+                            <List
+                                ref={registerChild}
+                                height={600}
+                                onRowsRendered={onRowsRendered}
+                                rowCount={total}
+                                rowHeight={44}
+                                rowRenderer={rowRenderer}
+                                width={width}
+                            />
+                        )}
+                    </AutoSizer>
+                )}
+            </InfiniteLoader>
+        ) : (
+            <div>Загрузка...</div>
+        )}
     </div>
   );
 };

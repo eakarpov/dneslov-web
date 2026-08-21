@@ -35,3 +35,35 @@
     cursor: pointer;
   }
 }
+
+.home-list {
+  width: 100%;
+}
+
+.home-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 0.6rem;
+  padding-right: 0.5rem;
+  box-sizing: border-box;
+}
+
+.home-row-chip {
+  flex: 0 0 4.5rem;
+  width: 4.5rem;
+  overflow: hidden;
+
+  .chip {
+    width: 100%;
+    box-sizing: border-box;
+  }
+}
+
+.home-row-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

@@ -14,6 +14,11 @@ const Navbar = () => {
                     priority
                 />
             </Link>
+            <nav className="navbar-links">
+                <Link href="/gallery">Галерея</Link>
+                <Link href="/rites">Чины</Link>
+                <Link href="/about">О проекте</Link>
+            </nav>
             <a href="https://dneslov.org" className="navbar-legacy-link">
                 Старая версия сайта
             </a>

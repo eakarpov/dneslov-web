@@ -13,7 +13,7 @@ export interface IGlobalSettings {
 export const initialState: IGlobalSettings = {
     dateValue: {
         calendarType: CALENDAR_TYPE.JULIAN,
-        value: Date.now() - 13 * 24 * 3600 * 1000,
+        value: undefined,
     },
     currentDate: undefined,
     search: "",

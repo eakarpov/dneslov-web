@@ -7,7 +7,7 @@ import {IMemory} from "../../../dto/memory";
 import {getDescribedMemoes, getExternalLinks, getHappenedAt, getOrder} from "./selectors";
 import {getScriptumTitle, sortScripta} from "../../../lib/liturgical";
 import {getEventTitle} from "../../../lib/events";
-import "./content.scss";
+import "../../common/content.scss";
 
 const LINK_LABELS: Record<string, string> = {
     WikiLink: "Википедия",
@@ -48,8 +48,9 @@ const MemoryPage = ({ item }: MemoryPageProps) => {
                     <span>{item.short_name}</span>
                     {item.names?.length > 0 && (
                         <div className="memory-names">
-                            {item.names.map((name) => (
-                                <span key={name.id}>{name.name_text}</span>
+                            {item.names.map((name, index) => (
+                                // real API responses contain names sharing the same id (different alphabet/language variants)
+                                <span key={`${name.id}-${index}`}>{name.name_text}</span>
                             ))}
                         </div>
                     )}

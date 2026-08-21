@@ -22,3 +22,19 @@ export const resolveApiAssetUrl = (path?: string): string | undefined => {
     if (!path) return undefined;
     return /^https?:\/\//.test(path) ? path : `${getApiOrigin()}${path}`;
 };
+
+const DEFAULT_TIMEOUT_MS = 10000;
+
+// The legacy backend occasionally stalls without ever erroring (connection just hangs),
+// which without an explicit timeout would hang the whole page render indefinitely.
+export const fetchLegacyJson = async (path: string, init: RequestInit = {}, timeoutMs = DEFAULT_TIMEOUT_MS) => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        const res = await fetch(buildLegacyApiUrl(path), { ...init, signal: controller.signal });
+        return await res.json();
+    } finally {
+        clearTimeout(timeoutId);
+    }
+};
