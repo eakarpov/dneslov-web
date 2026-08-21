@@ -1,10 +1,11 @@
 import {NextApiRequest, NextApiResponse} from "next";
 import axios, {AxiosRequestConfig} from "axios";
+import {buildLegacyApiUrl} from "../../../lib/api/host";
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     if (req.method === 'GET') {
         console.log(Object.keys(req.query)[0]);
-        return axios.get(`http://${process.env.BASE_API_HOST}/index.json?${Object.keys(req.query)[0]}`, {
+        return axios.get(`${buildLegacyApiUrl('/index.json')}?${Object.keys(req.query)[0]}`, {
             headers: {
                 Range: req.headers.range,
             },

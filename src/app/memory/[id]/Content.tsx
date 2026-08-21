@@ -1,7 +1,12 @@
 import {memo} from "react";
 import MemoryPage from "./MemoryPage";
+import {IMemory} from "../../../dto/memory";
 
-const Content = async ({ itemPromise }) => {
+interface ContentProps {
+    itemPromise: Promise<IMemory | undefined>;
+}
+
+const Content = async ({ itemPromise }: ContentProps) => {
     const item = await itemPromise;
 
     return (

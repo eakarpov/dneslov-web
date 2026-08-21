@@ -26,6 +26,20 @@
   background: #ee6e73;
 }
 
+.navbar-legacy-link {
+  margin-right: 1rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.4rem;
+  background: rgba(255, 255, 255, 0.25);
+  color: white;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.navbar-legacy-link:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
 .chip {
   border-radius: 2rem;
   color: rgba(47,16,95,0.6);
@@ -38,4 +52,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.audio-player-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-left: 0.5rem;
+  border-radius: 50%;
+  background: #ee6e73;
+  cursor: pointer;
+}
+
+.audio-player-icon {
+  width: 1rem;
+  height: 1rem;
+  color: white;
 }
