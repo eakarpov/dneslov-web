@@ -20,7 +20,7 @@
 
 .search-hint {
   font-size: 0.7rem;
-  color: #999;
+  color: var(--text-faint);
   margin-top: 2px;
 }
 
@@ -45,7 +45,7 @@
   padding: 1px 8px;
   border-radius: 10px;
   border: 1px solid transparent;
-  background: #f2f2f2;
+  background: var(--surface-2);
   font-size: 0.8rem;
   line-height: 1.4rem;
   white-space: nowrap;
@@ -75,8 +75,8 @@
 }
 
 .chip.event {
-  background: #eef4fa;
-  color: #3a5a78;
+  background: var(--event-bg);
+  color: var(--event-text);
 }
 
 .home-list {
@@ -88,7 +88,7 @@
 
 .home-empty {
   padding: 12px 0;
-  color: #777;
+  color: var(--text-muted);
 }
 
 .home-row {
@@ -107,8 +107,8 @@
   padding: 0.35rem 0.9rem;
   border: 0;
   border-radius: 0.35rem;
-  background: #ee6e73;
-  color: #fff;
+  background: var(--accent);
+  color: var(--on-accent);
   cursor: pointer;
 
   &:disabled {
@@ -118,7 +118,7 @@
 }
 
 .home-row-loading {
-  color: #999;
+  color: var(--text-faint);
   font-size: 0.85rem;
 }
 
@@ -142,7 +142,7 @@
   width: 100%;
   height: 100%;
   border-radius: 50%;
-  background: #f0ece9;
+  background: var(--blank);
 }
 
 .home-row-orders {
@@ -188,7 +188,7 @@
 
 .home-row-note {
   font-size: 0.75rem;
-  color: #777;
+  color: var(--text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -198,15 +198,15 @@
   margin-bottom: 8px;
   padding: 0.35rem 0.6rem;
   border-radius: 0.35rem;
-  background: #fdf3e3;
-  color: #7a5c28;
+  background: var(--warn-bg);
+  color: var(--warn-text);
   font-size: 0.78rem;
 }
 
 .day-ics {
   margin-left: auto;
   font-size: 0.75rem;
-  color: #3a6ea5;
+  color: var(--link);
   text-decoration: underline;
   white-space: nowrap;
 }
@@ -232,6 +232,8 @@
 
 // Printing a day. Everything that exists to navigate is dropped; what remains
 // is the day itself and its memories.
+// Paper is white whatever the screen is, so the print block keeps plain ink
+// colours rather than theme tokens.
 @media print {
   .search-container,
   .selection-container,

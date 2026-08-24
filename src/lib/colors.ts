@@ -14,20 +14,10 @@ const hash = (value: string): number => {
     return Math.abs(h);
 };
 
-export interface ChipColors {
-    background: string;
-    color: string;
-    borderColor: string;
-}
+// Only the hue is decided here. Saturation and lightness are theme tokens, so
+// the same chip works on a light and on a dark screen without this code — which
+// runs on the server — knowing which one the reader is on.
+export type ChipHue = { "--chip-h": string };
 
-export const slugChipColors = (slug?: string | null): ChipColors | undefined => {
-    if (!slug) return undefined;
-
-    const hue = hash(slug) % 360;
-
-    return {
-        background: `hsl(${hue} 55% 92%)`,
-        borderColor: `hsl(${hue} 45% 78%)`,
-        color: `hsl(${hue} 60% 28%)`,
-    };
-};
+export const slugChipHue = (slug?: string | null): ChipHue | undefined =>
+    slug ? ({ "--chip-h": `${hash(slug) % 360}` } as ChipHue) : undefined;

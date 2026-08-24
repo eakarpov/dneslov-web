@@ -37,6 +37,13 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Tells the browser both themes are supported, so form controls and
+  // scrollbars follow along instead of staying light on a dark page.
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ee6e73" },
+    { media: "(prefers-color-scheme: dark)", color: "#a8484d" },
+  ],
 };
 
 export default function RootLayout({

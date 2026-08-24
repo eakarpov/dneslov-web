@@ -1,7 +1,7 @@
 import { CSSProperties, memo } from "react";
 import Link from "next/link";
 import { XMarkIcon } from "@heroicons/react/24/solid";
-import { ChipColors } from "../../../lib/colors";
+import { ChipHue } from "../../../lib/colors";
 
 interface ChipProps {
     text?: string | null;
@@ -9,16 +9,16 @@ interface ChipProps {
     className?: string;
     // Shown as a native tooltip — the monolith puts the order's full name here.
     title?: string | null;
-    colors?: ChipColors;
+    hue?: ChipHue;
     onRemove?: () => void;
     removeLabel?: string;
 }
 
-const Chip = ({ text, url, className = "", title, colors, onRemove, removeLabel }: ChipProps) => {
+const Chip = ({ text, url, className = "", title, hue, onRemove, removeLabel }: ChipProps) => {
     if (!text) return null;
 
     const classes = `chip ${className}`.trim();
-    const style: CSSProperties | undefined = colors;
+    const style = hue as CSSProperties | undefined;
 
     if (url) {
         return (

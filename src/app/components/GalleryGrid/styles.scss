@@ -17,8 +17,8 @@
   margin-top: 1rem;
   padding: 0.5rem 1.2rem;
   border-radius: 0.4rem;
-  background: #ee6e73;
-  color: white;
+  background: var(--accent);
+  color: var(--on-accent);
   cursor: pointer;
 }
 
@@ -28,7 +28,7 @@
 }
 
 .gallery-empty {
-  color: #666;
+  color: var(--text-muted);
 }
 
 .gallery-image-full {

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ICalendar } from "../../../dto/calendar";
 import { IDayFilters, fetchCalendaries } from "../../../lib/api/day";
 import { buildListHref } from "../../../lib/routes";
-import { slugChipColors } from "../../../lib/colors";
+import { slugChipHue } from "../../../lib/colors";
 
 const PER_PAGE = 100;
 
@@ -69,20 +69,17 @@ const SourceList = ({ items, total, filters, defaultCalendaries }: SourceListPro
             {all.map((calendary) => {
                 const slug = calendary.slug?.text;
                 const isActive = selected.has(slug);
-                const colors = slugChipColors(slug);
+                const hue = slugChipHue(slug);
 
                 return (
                     <button
                         type="button"
                         key={calendary.id}
                         aria-pressed={isActive}
-                        // The colour is derived from the slug, so a calendary
-                        // looks the same here and in the selection chips.
-                        style={
-                            isActive
-                                ? { background: colors?.color, color: "#fff", borderColor: colors?.color }
-                                : colors
-                        }
+                        // The hue is derived from the slug, so a calendary looks
+                        // the same here and in the selection chips; the light
+                        // and dark shades of it live in the stylesheet.
+                        style={hue as React.CSSProperties | undefined}
                         className={`source-item ${isActive ? "source-item-is-active" : ""}`}
                         title={calendary.descriptions?.[0]?.text}
                         onClick={onToggle(calendary)}

@@ -32,14 +32,14 @@
     align-items: center;
     justify-content: center;
     gap: 0.75rem;
-    color: #f2f2f2;
+    color: #f2f2f2; // the overlay is dark in both themes
     font-size: 0.85rem;
     text-align: center;
   }
 }
 
 .lightbox-link {
-  color: #9ecbff;
+  color: #9ecbff; // ditto: a link on a black backdrop
   text-decoration: underline;
 }
 

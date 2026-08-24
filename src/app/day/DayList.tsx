@@ -8,7 +8,7 @@ import { IDayMemo, IDayMemoList } from "../../dto/day";
 import { buildListHref, dayCalendarHref, eventHref, memoryHref } from "../../lib/routes";
 import { civilToJulian, formatHuman } from "../../lib/dates/civil";
 import { normalizeQuery, parseQueryGroups, removeQueryGroup } from "../../lib/search";
-import { slugChipColors } from "../../lib/colors";
+import { slugChipHue } from "../../lib/colors";
 import { sameSlugs, writePreferences } from "../../lib/preferences";
 import Chip from "../components/Chip";
 import Markdown from "../../lib/markdown";
@@ -64,7 +64,7 @@ const DayRow = ({ item }: { item: IDayMemo }) => {
                         text={shortName ?? slug}
                         title={slug}
                         className="order"
-                        colors={slugChipColors(slug)}
+                        hue={slugChipHue(slug)}
                     />
                 ))}
             </div>
@@ -249,7 +249,7 @@ const DayList = ({
                         key={slug}
                         text={calendaryTitles[slug] ?? slug}
                         className="selection"
-                        colors={slugChipColors(slug)}
+                        hue={slugChipHue(slug)}
                         onRemove={() =>
                             navigate({
                                 calendaries: filters.calendaries.filter((item) => item !== slug),

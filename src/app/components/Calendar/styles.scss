@@ -8,7 +8,7 @@
 .calendar-wrapper :focus-visible,
 .source-item:focus-visible,
 .chip-remove:focus-visible {
-    outline: 2px solid #3a6ea5;
+    outline: 2px solid var(--link);
     outline-offset: 1px;
 }
 
@@ -16,7 +16,7 @@
     display: flex;
     flex-direction: row;
     justify-content: space-around;
-    background: #ee6e73;
+    background: var(--accent);
     height: 29px;
 
     & > button {
@@ -33,14 +33,14 @@
 }
 
 .calendar-active {
-    background: #c5171e;
+    background: var(--accent-strong);
 }
 
 .calendar-date-header {
     display: flex;
     flex-direction: row;
     height: 34px;
-    background: #ee6e73;
+    background: var(--accent);
     align-items: center;
 }
 
@@ -58,7 +58,7 @@
 }
 
 .calendar-picker {
-    background: #fbe9ea;
+    background: var(--accent-pale);
     padding: 6px;
 }
 
@@ -89,19 +89,19 @@
         border: 0;
         border-radius: 4px;
         padding: 3px 0;
-        background: #fff;
+        background: var(--surface);
         font-size: 0.75rem;
         cursor: pointer;
     }
 }
 
 .calendar-picker-active {
-    background: #ee6e73 !important;
-    color: #fff;
+    background: var(--accent) !important;
+    color: var(--on-accent);
 }
 
 .calendar-week-days {
-    background: #f79eb3;
+    background: var(--accent-soft);
     height: 26px;
     display: flex;
     flex-direction: row;
@@ -121,19 +121,19 @@
 }
 
 .calendar-day-is-today {
-    background: #afeeee;
+    background: var(--day-today);
 }
 
 .calendar-day-is-fasting {
-    background: #ca80f2;
+    background: var(--day-fast);
 }
 
 .calendar-day-is-easter {
-    background: crimson;
+    background: var(--day-easter);
 }
 
 .calendar-day-not-current-month {
-    color: grey;
+    color: var(--text-faint);
 }
 
 .calendar-day {
@@ -172,8 +172,8 @@
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: #0077cc;
-    color: white;
+    background: var(--link);
+    color: var(--on-accent);
     font-weight: 600;
 }
 
@@ -187,7 +187,7 @@
     display: flex;
     flex-direction: row;
     height: 34px;
-    background: #ee6e73;
+    background: var(--accent);
     align-items: center;
     justify-content: space-between;
 
@@ -209,7 +209,7 @@
     display: flex;
     flex-direction: row;
     height: 34px;
-    background: #ee6e73;
+    background: var(--accent);
     align-items: center;
     padding: 5px;
 }

@@ -14,7 +14,7 @@
 
 .tour-highlight {
   position: absolute;
-  border: 2px solid #ffd479;
+  border: 2px solid var(--accent-soft);
   border-radius: 0.4rem;
   // Punches the highlighted element out of the backdrop without a second layer.
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
@@ -30,7 +30,7 @@
   width: min(420px, calc(100vw - 2rem));
   padding: 0.9rem 1rem;
   border-radius: 0.5rem;
-  background: #fff;
+  background: var(--surface);
   box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
   pointer-events: auto;
 
@@ -50,7 +50,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: #999;
+  color: var(--text-faint);
   cursor: pointer;
 }
 
@@ -63,7 +63,7 @@
     border: 0;
     border-radius: 0.3rem;
     padding: 0.25rem 0.75rem;
-    background: #f0f0f0;
+    background: var(--surface-2);
     font: inherit;
     font-size: 0.8rem;
     cursor: pointer;
@@ -73,10 +73,10 @@
 .tour-progress {
   flex: 1;
   font-size: 0.75rem;
-  color: #999;
+  color: var(--text-faint);
 }
 
 .tour-next {
-  background: #ee6e73 !important;
-  color: #fff;
+  background: var(--accent) !important;
+  color: var(--on-accent);
 }
