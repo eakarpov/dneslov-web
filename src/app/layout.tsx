@@ -17,6 +17,10 @@ export const metadata: Metadata = {
   },
   description: "Онлайн-справочник церковных календарей",
   manifest: "/manifest.json",
+  // Readers and browsers discover the feed from here.
+  alternates: {
+    types: { "application/atom+xml": [{ url: "/feed.xml", title: "Днеслов — памяти дня" }] },
+  },
   icons: {
     icon: [
       { url: "/favicons/dneslov-fav.svg", type: "image/svg+xml" },

@@ -58,6 +58,20 @@ const withLineBreaks = (paragraph: string, keyPrefix: string): ReactNode[] =>
         ...renderInline(line, `${keyPrefix}-${index}`),
     ]);
 
+// For places that carry text but cannot carry markup — a feed summary, a
+// calendar file description — the markers are removed rather than shown as
+// literal asterisks.
+export const plainText = (source?: string | null): string => {
+    if (!source) return "";
+
+    return source
+        .replace(/\[([^\]\n]+)\]\([^)\s]+\)/g, "$1")
+        .replace(/\*\*([^*\n]+)\*\*/g, "$1")
+        .replace(/__([^_\n]+)__/g, "$1")
+        .replace(/\*([^*\n]+)\*/g, "$1")
+        .replace(/_([^_\n]+)_/g, "$1");
+};
+
 interface MarkdownProps {
     source?: string | null;
     // Inline mode renders no paragraphs — for places like a list row where the

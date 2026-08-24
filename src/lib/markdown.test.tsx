@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
-import Markdown from "./markdown";
+import Markdown, { plainText } from "./markdown";
 
 const render = (source?: string | null, inline = false) =>
     renderToStaticMarkup(<Markdown source={source} inline={inline} />);
@@ -56,5 +56,25 @@ describe("Markdown", () => {
 
     it("does not treat an unpaired asterisk as emphasis", () => {
         expect(render("5 * 3 = 15")).toContain("5 * 3 = 15");
+    });
+});
+
+describe("plainText", () => {
+    it("takes the markers off", () => {
+        expect(plainText("К 8-му веку **выносили** Крест")).toBe("К 8-му веку выносили Крест");
+        expect(plainText("а *б* и _в_ и __г__")).toBe("а б и в и г");
+    });
+
+    it("keeps the label of a link and drops the address", () => {
+        expect(plainText("см. [Древо](https://drevo-info.ru/x)")).toBe("см. Древо");
+    });
+
+    it("leaves liturgical slashes alone", () => {
+        expect(plainText("первопрестольницы/ и учителие,//")).toBe("первопрестольницы/ и учителие,//");
+    });
+
+    it("has nothing to say about nothing", () => {
+        expect(plainText(undefined)).toBe("");
+        expect(plainText(null)).toBe("");
     });
 });

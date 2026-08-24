@@ -3,6 +3,7 @@ import { getDayMemories } from "../../../api";
 import { parseCalendaries, resolveDay } from "../../resolve";
 import { parseCivilISO } from "../../../../lib/dates/civil";
 import { buildDayCalendar, IcsEntry } from "../../../../lib/ics";
+import { plainText } from "../../../../lib/markdown";
 import { memoryHref } from "../../../../lib/routes";
 
 export const revalidate = 3600;
@@ -29,7 +30,7 @@ export async function GET(request: NextRequest, { params }: { params: { date: st
         .map((item, index) => ({
             uid: `${item.slug ?? index}-${params.date}@dneslov`,
             summary: [Object.values(item.orders ?? {})[0], item.title].filter(Boolean).join(" "),
-            description: item.note ?? undefined,
+            description: plainText(item.note) || undefined,
             url: item.slug ? `${origin}${memoryHref(item.slug)}` : undefined,
         }));
 
