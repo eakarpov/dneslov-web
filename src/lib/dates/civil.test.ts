@@ -143,11 +143,17 @@ describe("addDays", () => {
 });
 
 describe("toLegacyDateParam", () => {
-    it("always sends the new-Julian prefix with the civil date", () => {
-        // We address days civilly, so the backend must read the number as
-        // new-Julian; sending "ю" here would shift the query by 13 days.
-        expect(toLegacyDateParam({ year: 2026, month: 8, day: 24 })).toBe("н24.08.2026");
-        expect(toLegacyDateParam({ year: 2026, month: 1, day: 7 })).toBe("н07.01.2026");
+    it("asks for the day by its old-style numerals", () => {
+        // The backend stores year_date in the old style and matches it
+        // literally; sending the civil numbers asks for a day 13 days away.
+        expect(toLegacyDateParam({ year: 2026, month: 8, day: 24 })).toBe("ю11.08.2026");
+        expect(toLegacyDateParam({ year: 2026, month: 1, day: 7 })).toBe("ю25.12.2025");
+    });
+
+    it("pins Dormition, where getting this wrong is obvious", () => {
+        // 28 August civil is 15 August old style — the Dormition of the Mother
+        // of God, which the reference keeps at 15.08.
+        expect(toLegacyDateParam({ year: 2026, month: 8, day: 28 })).toBe("ю15.08.2026");
     });
 });
 

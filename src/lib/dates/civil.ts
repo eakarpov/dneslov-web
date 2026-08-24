@@ -123,11 +123,16 @@ export const julianGapDays = (parts: DateParts): number =>
 // back to the civil day they address.
 export const julianToCivil = (parts: DateParts): DateParts => jdnToGregorian(julianToJdn(parts));
 
-// The legacy backend takes the date as `d=<style><DD.MM.YYYY>`, where the style
-// prefix says how to read the number: `н` = new-Julian (== civil until 2800),
-// `ю` = Julian. We always address days civilly, so we always send `н`.
-export const toLegacyDateParam = (parts: DateParts): string =>
-    `н${pad(parts.day)}.${pad(parts.month)}.${parts.year}`;
+// The legacy backend matches the stored `year_date` literally: dates_to_days
+// puts "DD.MM" into the query as written, and the `ю`/`н` prefix only decides
+// how weekdays and Pascha-relative rules are counted — it converts nothing.
+// Since `year_date` holds OLD STYLE numerals (Dormition sits at 15.08, i.e.
+// 28 August civil), a civil day has to be asked for by its Julian numerals.
+export const toLegacyDateParam = (parts: DateParts): string => {
+    const julian = civilToJulian(parts);
+
+    return `ю${pad(julian.day)}.${pad(julian.month)}.${julian.year}`;
+};
 
 const MONTHS_GENITIVE = [
     "января", "февраля", "марта", "апреля", "мая", "июня",
