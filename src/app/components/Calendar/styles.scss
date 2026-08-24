@@ -62,10 +62,6 @@
     background: #afeeee;
 }
 
-.calendar-day-is-active {
-    background: #00bfff;
-}
-
 .calendar-day-is-fasting {
     background: #ca80f2;
 }
@@ -88,6 +84,8 @@
 
     & > span {
         display: flex;
+        align-items: center;
+        justify-content: center;
         padding: 0;
         margin: 0;
     }
@@ -95,6 +93,19 @@
     & > .secondary {
         font-size: 8px;
     }
+}
+
+// The selected day always shows as a circle around the day number, layered on top of
+// whatever square background the cell already has (fasting/today/easter) — a sibling
+// class on the same cell would just lose to those on cascade order, so this needs to be
+// a distinct child element instead, not a competing background on .calendar-day itself.
+.calendar-day-is-active > span:first-child {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #0077cc;
+    color: white;
+    font-weight: 600;
 }
 
 .calendar-chevron {

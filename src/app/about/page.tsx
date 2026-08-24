@@ -6,7 +6,7 @@ const AboutRoutePage = () => {
     return (
         <div>
             <Navbar />
-            <main className="flex m-4 w-full">
+            <main className="flex m-4">
                 <AboutPage />
             </main>
         </div>

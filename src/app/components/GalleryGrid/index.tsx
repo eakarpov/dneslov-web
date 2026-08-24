@@ -42,7 +42,7 @@ const GalleryGrid = ({ initialImages, total, slug, event }: GalleryGridProps) =>
             <div className="gallery-grid">
                 {images.map((image) => (
                     <Link href={`/gallery/${image.uid}`} key={image.uid} className="gallery-grid-item">
-                        <img src={image.thumb_url} alt={image.titles?.[0]?.text || ''} />
+                        <img src={image.thumb_url} alt={image.titles?.[0]?.text || ''} referrerPolicy="no-referrer" />
                     </Link>
                 ))}
             </div>

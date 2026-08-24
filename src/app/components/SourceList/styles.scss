@@ -5,7 +5,13 @@
   row-gap: 10px;
   max-width: 400px;
   max-height: 400px;
-  overflow-y: scroll;
+  overflow-y: auto;
+  scrollbar-width: none; // Firefox
+  -ms-overflow-style: none; // legacy Edge
+
+  &::-webkit-scrollbar {
+    display: none; // Chrome/Safari/Chromium Edge
+  }
 }
 
 .source-item {

@@ -61,7 +61,7 @@ const MemoryPage = ({ item }: MemoryPageProps) => {
             {item.image_url && (
                 <div className="memory-image">
                     <Link href={`/memory/${item.slug}/gallery`}>
-                        <img src={item.image_url} alt={item.short_name} />
+                        <img src={item.image_url} alt={item.short_name} referrerPolicy="no-referrer" />
                     </Link>
                 </div>
             )}

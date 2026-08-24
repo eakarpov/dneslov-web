@@ -20,7 +20,7 @@ const ImagePage = ({ image }: ImagePageProps) => {
     return (
         <div className="flex flex-col w-full content-page">
             {image.title && <div className="content-title">{image.title}</div>}
-            <img src={image.url} alt={image.title || ''} className="gallery-image-full" />
+            <img src={image.url} alt={image.title || ''} className="gallery-image-full" referrerPolicy="no-referrer" />
             {image.description && (
                 <p className="content-description">{image.description}</p>
             )}

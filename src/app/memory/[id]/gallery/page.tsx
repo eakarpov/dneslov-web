@@ -9,7 +9,7 @@ const MemoryGalleryRoutePage = (props: { params: { id: string } }) => {
     return (
         <div>
             <Navbar />
-            <main className="flex m-4 w-full">
+            <main className="flex m-4">
                 <Suspense fallback={<div>Загрузка...</div>}>
                     <Content galleryPromise={galleryPromise} memorySlug={props.params.id} />
                 </Suspense>

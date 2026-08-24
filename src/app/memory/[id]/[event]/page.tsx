@@ -1,17 +1,45 @@
+import {Metadata} from "next";
 import {memo, Suspense} from "react";
 import Navbar from "../../../common/Navbar";
 import {getEvent} from "./api";
 import Content from "./Content";
+import {getEventTitle} from "../../../../lib/events";
 
-const EventRoutePage = (props: { params: { id: string; event: string } }) => {
-    const eventPromise = getEvent(props.params.id, props.params.event);
+export const revalidate = 3600;
+
+interface PageParams {
+    params: { id: string; event: string };
+}
+
+export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
+    const event = await getEvent(params.id, params.event);
+
+    if (!event) {
+        return { title: "Событие не найдено — Днеслов" };
+    }
+
+    const title = `${getEventTitle(event)} — Днеслов`;
+    const description = event.description?.slice(0, 200);
+
+    return {
+        title,
+        description,
+        openGraph: {
+            title,
+            description,
+        },
+    };
+}
+
+const EventRoutePage = ({ params }: PageParams) => {
+    const eventPromise = getEvent(params.id, params.event);
 
     return (
         <div>
             <Navbar />
-            <main className="flex m-4 w-full">
+            <main className="flex m-4">
                 <Suspense fallback={<div>Загрузка...</div>}>
-                    <Content eventPromise={eventPromise} memorySlug={props.params.id} />
+                    <Content eventPromise={eventPromise} memorySlug={params.id} />
                 </Suspense>
             </main>
         </div>

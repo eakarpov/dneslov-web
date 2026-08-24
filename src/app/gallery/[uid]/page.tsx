@@ -9,7 +9,7 @@ const GalleryImageRoutePage = (props: { params: { uid: string } }) => {
     return (
         <div>
             <Navbar />
-            <main className="flex m-4 w-full">
+            <main className="flex m-4">
                 <Suspense fallback={<div>Загрузка...</div>}>
                     <Content imagePromise={imagePromise} />
                 </Suspense>
