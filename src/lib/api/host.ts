@@ -23,6 +23,16 @@ export const resolveApiAssetUrl = (path?: string): string | undefined => {
     return /^https?:\/\//.test(path) ? path : `${getApiOrigin()}${path}`;
 };
 
+// Thrown when the backend could not be reached or answered with a server error.
+// Distinct from "the backend answered, and the thing does not exist" — the two
+// must never render the same, and a failure must never be cached as an answer.
+export class LegacyUnavailableError extends Error {
+    constructor(readonly path: string, readonly status?: number) {
+        super(`legacy backend unavailable for ${path}${status ? ` (${status})` : ""}`);
+        this.name = "LegacyUnavailableError";
+    }
+}
+
 const DEFAULT_TIMEOUT_MS = 10000;
 
 // The legacy backend occasionally stalls without ever erroring (connection just hangs),
@@ -31,10 +41,19 @@ export const fetchLegacyJson = async (path: string, init: RequestInit = {}, time
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
+    let res: Response;
+
     try {
-        const res = await fetch(buildLegacyApiUrl(path), { ...init, signal: controller.signal });
-        return await res.json();
+        res = await fetch(buildLegacyApiUrl(path), { ...init, signal: controller.signal });
+    } catch (e) {
+        throw new LegacyUnavailableError(path);
     } finally {
         clearTimeout(timeoutId);
     }
+
+    // A real 404 from Rails is an answer: the record does not exist.
+    if (res.status === 404) return null;
+    if (!res.ok) throw new LegacyUnavailableError(path, res.status);
+
+    return res.json();
 };

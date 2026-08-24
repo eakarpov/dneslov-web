@@ -17,9 +17,10 @@ const LINK_LABELS: Record<string, string> = {
 
 interface MemoryPageProps {
     item?: IMemory;
+    unavailable?: boolean;
 }
 
-const MemoryPage = ({ item }: MemoryPageProps) => {
+const MemoryPage = ({ item, unavailable }: MemoryPageProps) => {
     const [playingAudioUrl, setPlayingAudioUrl] = useState<string>("");
 
     const onActivePlay = useCallback((url: string) => {
@@ -35,7 +36,9 @@ const MemoryPage = ({ item }: MemoryPageProps) => {
     if (!item) {
         return (
             <div className="flex flex-col memory-page">
-                Память не найдена
+                {unavailable
+                    ? "Справочник сейчас не отвечает. Попробуйте обновить страницу."
+                    : "Память не найдена"}
             </div>
         );
     }

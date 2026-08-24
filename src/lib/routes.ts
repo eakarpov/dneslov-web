@@ -1,4 +1,4 @@
-import { IDayFilters } from "../app/api";
+import { IDayFilters } from "./api/day";
 import { DateParts, formatCivilISO } from "./dates/civil";
 
 // Every filter that changes *which* memories are listed lives in the URL, so a
@@ -25,7 +25,10 @@ export const buildListHref = (
     return search ? `${path}?${search}` : path;
 };
 
-export const memoryHref = (slug: string): string => `/memory/${encodeURIComponent(slug)}`;
+// Not percent-encoded here: both next/link and the metadata layer encode the
+// path themselves, and pre-encoding made canonical URLs come out double-encoded
+// (%25D1%2581... instead of %D1%81...).
+export const memoryHref = (slug: string): string => `/memory/${slug}`;
 
 export const eventHref = (slug: string, event: number | string): string =>
     `${memoryHref(slug)}/${event}`;

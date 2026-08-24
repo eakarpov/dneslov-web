@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useState } from "react";
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { fetchDayMemories, IDayFilters } from "../api";
+import { fetchDayMemories, IDayFilters } from "../../lib/api/day";
 import { IDayMemo, IDayMemoList } from "../../dto/day";
 import { buildListHref, memoryHref } from "../../lib/routes";
 import { formatHuman } from "../../lib/dates/civil";

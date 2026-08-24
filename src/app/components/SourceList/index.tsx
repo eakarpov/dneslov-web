@@ -3,8 +3,7 @@ import { memo, useCallback, useEffect, useState } from "react";
 import "./styles.scss";
 import { useRouter } from "next/navigation";
 import { ICalendar } from "../../../dto/calendar";
-import { IDayFilters } from "../../api";
-import { fetchCalendaries } from "../../api";
+import { IDayFilters, fetchCalendaries } from "../../../lib/api/day";
 import { buildListHref } from "../../../lib/routes";
 
 const PER_PAGE = 100;

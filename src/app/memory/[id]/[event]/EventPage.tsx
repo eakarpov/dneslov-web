@@ -11,9 +11,10 @@ import "../../../common/content.scss";
 interface EventPageProps {
     event?: IEvent;
     memorySlug: string;
+    unavailable?: boolean;
 }
 
-const EventPage = ({ event, memorySlug }: EventPageProps) => {
+const EventPage = ({ event, memorySlug, unavailable }: EventPageProps) => {
     const [playingAudioUrl, setPlayingAudioUrl] = useState<string>("");
 
     const onActivePlay = useCallback((url: string) => {
@@ -26,7 +27,9 @@ const EventPage = ({ event, memorySlug }: EventPageProps) => {
     if (!event) {
         return (
             <div className="flex flex-col content-page">
-                Событие не найдено
+                {unavailable
+                    ? "Справочник сейчас не отвечает. Попробуйте обновить страницу."
+                    : "Событие не найдено"}
             </div>
         );
     }

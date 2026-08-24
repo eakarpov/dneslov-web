@@ -1,16 +1,17 @@
 import {memo} from "react";
 import MemoryPage from "./MemoryPage";
 import {IMemory} from "../../../dto/memory";
+import {LegacyResult} from "../../../lib/api/load";
 
 interface ContentProps {
-    itemPromise: Promise<IMemory | undefined>;
+    itemPromise: Promise<LegacyResult<IMemory>>;
 }
 
 const Content = async ({ itemPromise }: ContentProps) => {
-    const item = await itemPromise;
+    const { data, unavailable } = await itemPromise;
 
     return (
-        <MemoryPage item={item} />
+        <MemoryPage item={data ?? undefined} unavailable={unavailable} />
     );
 }
 

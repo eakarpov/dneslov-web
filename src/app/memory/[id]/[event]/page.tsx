@@ -4,6 +4,7 @@ import Navbar from "../../../common/Navbar";
 import {getEvent} from "./api";
 import Content from "./Content";
 import {getEventTitle} from "../../../../lib/events";
+import {eventHref} from "../../../../lib/routes";
 
 export const revalidate = 3600;
 
@@ -12,7 +13,11 @@ interface PageParams {
 }
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
-    const event = await getEvent(params.id, params.event);
+    const { data: event, unavailable } = await getEvent(params.id, params.event);
+
+    if (unavailable) {
+        return { title: "Справочник недоступен — Днеслов", robots: { index: false } };
+    }
 
     if (!event) {
         return { title: "Событие не найдено — Днеслов" };
@@ -24,6 +29,7 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
     return {
         title,
         description,
+        alternates: { canonical: eventHref(params.id, params.event) },
         openGraph: {
             title,
             description,

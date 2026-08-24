@@ -7,7 +7,7 @@ import "dayjs/locale/ru";
 import { useRouter } from "next/navigation";
 import { CALENDAR_TYPE } from "../../../types/index";
 import { ICalendar } from "../../../dto/calendar";
-import { IDayFilters } from "../../api";
+import { IDayFilters } from "../../../lib/api/day";
 import { buildListHref } from "../../../lib/routes";
 import { getFullWeeksStartAndEndInMonth } from "../../../lib/utils/dates";
 import {
