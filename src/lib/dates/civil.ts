@@ -114,8 +114,10 @@ export const addDays = (parts: DateParts, days: number): DateParts => {
 // 13 days — the gap grows to 14 in 2100 and the app should not need a fix then.
 export const civilToJulian = (parts: DateParts): DateParts => jdnToJulian(gregorianToJdn(parts));
 
+// How many days the old style lags behind the civil one for a given date:
+// 13 today, 14 from 1 March 2100. Positive by definition — civil is ahead.
 export const julianGapDays = (parts: DateParts): number =>
-    gregorianToJdn(parts) - julianToJdn(parts);
+    julianToJdn(parts) - gregorianToJdn(parts);
 
 // Inverse of civilToJulian: takes the numerals shown in the Julian-style grid
 // back to the civil day they address.
