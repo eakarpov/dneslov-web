@@ -1,13 +1,49 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.scss";
 import StoreProvider from "./StoreProvider";
+import Navbar from "./common/Navbar";
+import { SITE_URL } from "../lib/site";
 
 const inter = Inter({ subsets: ["cyrillic-ext"] });
 
 export const metadata: Metadata = {
-  title: "Днеслов",
+  // Without this, canonical and og:url come out relative and resolve against
+  // whatever host happens to serve the page.
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Днеслов",
+    template: "%s",
+  },
   description: "Онлайн-справочник церковных календарей",
+  manifest: "/manifest.json",
+  // Readers and browsers discover the feed from here.
+  alternates: {
+    types: { "application/atom+xml": [{ url: "/feed.xml", title: "Днеслов — памяти дня" }] },
+  },
+  icons: {
+    icon: [
+      { url: "/favicons/dneslov-fav.svg", type: "image/svg+xml" },
+      { url: "/favicons/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicons/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+    ],
+    apple: [
+      { url: "/favicons/apple-touch-icon-180x180.png", sizes: "180x180" },
+      { url: "/favicons/apple-touch-icon-152x152.png", sizes: "152x152" },
+    ],
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  // Tells the browser both themes are supported, so form controls and
+  // scrollbars follow along instead of staying light on a dark page.
+  colorScheme: "light dark",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ee6e73" },
+    { media: "(prefers-color-scheme: dark)", color: "#a8484d" },
+  ],
 };
 
 export default function RootLayout({
@@ -16,9 +52,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ru">
       <body className={inter.className}>
-        <StoreProvider>{children}</StoreProvider>
+        <StoreProvider>
+          {/* Chrome lives here so every page — including error.tsx and
+              not-found.tsx — keeps its navigation. */}
+          <Navbar />
+          <main className="page-shell">{children}</main>
+        </StoreProvider>
       </body>
     </html>
   );

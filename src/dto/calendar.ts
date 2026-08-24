@@ -22,7 +22,9 @@ export enum FAST_MEASURE {
 export interface IFastDaysMeta {
     title: string;
     measure: FAST_MEASURE[]|FAST_MEASURE;
-    days: string[];
+    // Real payloads send both a single range ("01.08..14.08") and a list of
+    // them; the reading code already flattened either shape.
+    days: string[]|string;
 }
 
 export interface ICalendarMeta {
@@ -37,6 +39,7 @@ export interface ICalendar {
     id: number;
     slug: ISlug;
     titles: ICalendarTitle[];
-    description: ICalendarTitle[];
+    // Real payload key is plural — `description` never existed on the wire.
+    descriptions?: ICalendarTitle[];
     meta: ICalendarMeta;
 }

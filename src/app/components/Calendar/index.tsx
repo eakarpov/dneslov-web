@@ -1,193 +1,257 @@
 "use client";
-import {memo, useCallback, useEffect, useMemo} from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import "./styles.scss";
-import {ChevronLeftIcon, ChevronRightIcon, Cog6ToothIcon} from '@heroicons/react/24/solid';
+import { ChevronLeftIcon, ChevronRightIcon, Cog6ToothIcon } from "@heroicons/react/24/solid";
 import dayjs from "dayjs";
 import "dayjs/locale/ru";
-import {CALENDAR_TYPE} from "../../../types/index";
-import {useAppDispatch, useAppSelector} from "../../../lib/hooks";
-import { slice } from "../../../lib/store/global";
-import {getFullWeeksStartAndEndInMonth} from "../../../lib/utils/dates";
+import { useRouter } from "next/navigation";
+import { CALENDAR_TYPE } from "../../../types/index";
+import { ICalendar } from "../../../dto/calendar";
+import { IDayFilters } from "../../../lib/api/day";
+import { buildListHref } from "../../../lib/routes";
+import { getFullWeeksStartAndEndInMonth } from "../../../lib/utils/dates";
+import {
+    DateParts,
+    addDays,
+    churchToday,
+    civilToJulian,
+    formatCivilISO,
+    fromDate,
+    julianToCivil,
+    toDate,
+} from "../../../lib/dates/civil";
+import { DEFAULT_PREFERENCES, readPreferences, writePreferences } from "../../../lib/preferences";
 
 const isSundayFirst = true;
 
-const Calendar = () => {
-    const dispatch = useAppDispatch();
-    const dateValue = useAppSelector(state => state.global.dateValue);
-    const currentDateValue = useAppSelector(state => state.global.currentDate);
+const MONTHS = [
+    "январь", "февраль", "март", "апрель", "май", "июнь",
+    "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь",
+];
 
-    const calendaries = useAppSelector(state => state.global.calendaries);
-    const currentCalendar = useAppSelector(state => state.global.currentCalendar);
+const FAST_TITLES: Record<string, string> = {
+    meat: "без мяса",
+    egg: "без яиц",
+    milk: "без молочного",
+    butter: "без масла",
+    fish: "без рыбы",
+};
 
-    const fastDays = useMemo(() => currentCalendar?.meta?.fast_days, [currentCalendar]);
+const fastTitle = (fast: unknown): string | undefined =>
+    typeof fast === "string" ? FAST_TITLES[fast] ?? "постный день" : fast ? "постный день" : undefined;
 
-    const isJul = dateValue.calendarType === CALENDAR_TYPE.JULIAN;
+interface CalendarProps {
+    filters: IDayFilters;
+    defaultCalendaries: string[];
+    calendaries: ICalendar[];
+}
 
-    const pickedDate = dateValue.value ? isJul ? dayjs(dateValue.value) : dayjs(dateValue.value).add(13, "days") : null;
+const Calendar = ({ filters, defaultCalendaries, calendaries }: CalendarProps) => {
+    const router = useRouter();
 
-    const today = dayjs();
-    const dateToday = isJul ? today.subtract(13, "days") : today;
+    // Display style is a preference, not part of the address: the same day has
+    // exactly one URL whichever style it is drawn in. Read after mount so the
+    // server and the first client render agree.
+    const [calendarType, setCalendarType] = useState(DEFAULT_PREFERENCES.calendarType);
+    useEffect(() => setCalendarType(readPreferences().calendarType), []);
 
-    const dateValueObject = dayjs(currentDateValue, { locale: "ru" });
-    const dateValueObjectOld = dateValueObject.subtract(13, "days");
+    const isJul = calendarType === CALENDAR_TYPE.JULIAN;
 
-    const onJulianClicked = useCallback(() => {
-        dispatch(slice.actions.UpdateCalendarType(CALENDAR_TYPE.JULIAN));
+    // The grid is drawn in the numerals of the chosen style ("frame"); URLs and
+    // everything crossing the wire stay civil.
+    const toFrame = useCallback((date: DateParts) => (isJul ? civilToJulian(date) : date), [isJul]);
+    const fromFrame = useCallback((date: DateParts) => (isJul ? julianToCivil(date) : date), [isJul]);
+
+    const today = useMemo(() => churchToday(), []);
+    const selected = filters.date ?? today;
+    const selectedKey = filters.date ? formatCivilISO(filters.date) : null;
+
+    // Which month the grid shows; follows the selection but can be paged away.
+    const [anchor, setAnchor] = useState<DateParts>(selected);
+    const [pickerOpen, setPickerOpen] = useState(false);
+    useEffect(() => {
+        if (filters.date) setAnchor(filters.date);
+    }, [selectedKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const frameAnchor = toFrame(anchor);
+
+    const currentCalendar = useMemo(
+        () => calendaries.find((calendary) => filters.calendaries.includes(calendary.slug?.text)),
+        [calendaries, filters.calendaries],
+    );
+
+    const goToDate = useCallback(
+        (date: DateParts) => {
+            router.push(buildListHref({ ...filters, date }, defaultCalendaries));
+        },
+        [router, filters, defaultCalendaries],
+    );
+
+    const shiftMonth = useCallback(
+        (months: number) => {
+            const shifted = dayjs(toDate(frameAnchor)).add(months, "month");
+            setAnchor(fromFrame(fromDate(shifted.toDate())));
+        },
+        [frameAnchor, fromFrame],
+    );
+
+    const pickMonth = useCallback(
+        (month: number) => {
+            setAnchor(fromFrame({ ...frameAnchor, month, day: 1 }));
+            setPickerOpen(false);
+        },
+        [frameAnchor, fromFrame],
+    );
+
+    const shiftYear = useCallback(
+        (years: number) => {
+            setAnchor(fromFrame({ ...frameAnchor, year: frameAnchor.year + years, day: 1 }));
+        },
+        [frameAnchor, fromFrame],
+    );
+
+    const onPickStyle = useCallback((next: CALENDAR_TYPE) => {
+        setCalendarType(next);
+        writePreferences({ calendarType: next });
     }, []);
-
-    const onNewJulianClicked = useCallback(() => {
-        dispatch(slice.actions.UpdateCalendarType(CALENDAR_TYPE.NEW_JULIAN))
-    }, []);
-
-    const onGoNextMonth = useCallback(() => {
-        dispatch(slice.actions.UpdateCurrentDate(dateValueObject.add(1, 'month').valueOf()));
-    }, [dateValueObject]);
-
-    const onGoPrevMonth = useCallback(() => {
-        dispatch(slice.actions.UpdateCurrentDate(dateValueObject.subtract(1, 'month').valueOf()));
-    }, [dateValueObject]);
-
-    const onGoTomorrow = useCallback(() => {
-        dispatch(slice.actions.UpdateCurrentDate(today.add(1, 'day').valueOf()));
-        dispatch(slice.actions.UpdateDateValue(dateToday.add(1, 'day').valueOf()));
-    }, [dateToday, today]);
-
-    const onGoYesterday = useCallback(() => {
-        dispatch(slice.actions.UpdateCurrentDate(today.subtract(1, 'day').valueOf()));
-        dispatch(slice.actions.UpdateDateValue(dateToday.subtract(1, 'day').valueOf()));
-    }, [dateToday, today]);
-
-    const onGoToDate = useCallback((date) => () => {
-        dispatch(slice.actions.UpdateDateValue(isJul ? date.dateJs.valueOf() : date.dateJs.subtract(13, "days").valueOf()));
-    }, [isJul]);
 
     const weekArray = getFullWeeksStartAndEndInMonth(
-        isJul ? dateValueObjectOld.month() : dateValueObject.month(),
-        isJul ? dateValueObjectOld.year() : dateValueObject.year(),
-        isJul ? dateValueObjectOld.startOf("month").add(13, "days") : dateValueObject.startOf("month"),
-        dateToday,
-        pickedDate,
+        frameAnchor.month - 1,
+        frameAnchor.year,
+        // Weekday of the month start must come from the real civil date.
+        dayjs(toDate(fromFrame({ ...frameAnchor, day: 1 }))),
+        dayjs(toDate(toFrame(today))),
+        filters.date ? dayjs(toDate(toFrame(filters.date))) : null,
         isSundayFirst,
-        fastDays,
+        currentCalendar?.meta?.fast_days ?? [],
         isJul,
     );
 
-    useEffect(() => {
-        if (!pickedDate) return;
-        if (pickedDate.month() !== dateValueObject.month() || pickedDate.year() !== dateValueObject.year()) {
-            console.log('should trigger');
-
-        }
-        // dispatch(slice.actions.UpdateCurrentDate(pickedDate.valueOf()));
-    }, [pickedDate, dateValueObject]);
-
-    useEffect(() => {
-        const currCalendar =  calendaries.find(item => item.licit);
-        if (currCalendar) {
-            dispatch(slice.actions.UpdateCurrentCalendar(currCalendar));
-        }
-    }, [calendaries]);
+    const monthLabel = dayjs(toDate(frameAnchor)).locale("ru").format("MMMM");
 
     return (
         <div className="calendar-wrapper">
             <div className="calendar-header">
-                <div
-                    onClick={onJulianClicked}
-                    className={dateValue.calendarType === CALENDAR_TYPE.JULIAN ? "calendar-active" : ""}
+                <button
+                    type="button"
+                    aria-pressed={isJul}
+                    onClick={() => onPickStyle(CALENDAR_TYPE.JULIAN)}
+                    className={isJul ? "calendar-active" : ""}
                 >
                     Юлианский
-                </div>
-                <div
-                    onClick={onNewJulianClicked}
-                    className={dateValue.calendarType === CALENDAR_TYPE.NEW_JULIAN ? "calendar-active" : ""}
+                </button>
+                <button
+                    type="button"
+                    aria-pressed={!isJul}
+                    onClick={() => onPickStyle(CALENDAR_TYPE.NEW_JULIAN)}
+                    className={!isJul ? "calendar-active" : ""}
                 >
                     Новоюлианский
-                </div>
+                </button>
             </div>
             <div className="calendar-date-header">
-                <div className="calendar-chevron" onClick={onGoPrevMonth}>
+                <button
+                    type="button"
+                    className="calendar-chevron"
+                    aria-label="Предыдущий месяц"
+                    onClick={() => shiftMonth(-1)}
+                >
                     <ChevronLeftIcon />
-                </div>
-                <div className="calendar-month">
-                    {dateValueObject.format("MMMM")}, {dateValueObject.year()}
-                </div>
-                <div className="calendar-chevron" onClick={onGoNextMonth}>
+                </button>
+                <button
+                    type="button"
+                    className="calendar-month"
+                    aria-expanded={pickerOpen}
+                    onClick={() => setPickerOpen((open) => !open)}
+                >
+                    {monthLabel}, {frameAnchor.year}
+                </button>
+                <button
+                    type="button"
+                    className="calendar-chevron"
+                    aria-label="Следующий месяц"
+                    onClick={() => shiftMonth(1)}
+                >
                     <ChevronRightIcon />
-                </div>
+                </button>
             </div>
+            {pickerOpen && (
+                <div className="calendar-picker">
+                    <div className="calendar-picker-year">
+                        <button type="button" onClick={() => shiftYear(-1)} aria-label="Предыдущий год">
+                            <ChevronLeftIcon />
+                        </button>
+                        <span>{frameAnchor.year}</span>
+                        <button type="button" onClick={() => shiftYear(1)} aria-label="Следующий год">
+                            <ChevronRightIcon />
+                        </button>
+                    </div>
+                    <div className="calendar-picker-months">
+                        {MONTHS.map((name, index) => (
+                            <button
+                                type="button"
+                                key={name}
+                                className={index + 1 === frameAnchor.month ? "calendar-picker-active" : ""}
+                                onClick={() => pickMonth(index + 1)}
+                            >
+                                {name.slice(0, 3)}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
             <div className="calendar-week-days">
-                {isSundayFirst && (
-                    <div>
-                        Вс
-                    </div>
-                )}
-                <div>
-                    Пн
-                </div>
-                <div>
-                    Вт
-                </div>
-                <div>
-                    Ср
-                </div>
-                <div>
-                    Чт
-                </div>
-                <div>
-                    Пт
-                </div>
-                <div>
-                    Сб
-                </div>
-                {!isSundayFirst && (
-                    <div>
-                        Вс
-                    </div>
-                )}
+                {isSundayFirst && <div>Вс</div>}
+                <div>Пн</div>
+                <div>Вт</div>
+                <div>Ср</div>
+                <div>Чт</div>
+                <div>Пт</div>
+                <div>Сб</div>
+                {!isSundayFirst && <div>Вс</div>}
             </div>
-            {weekArray.map(week => (
-                <div className="calendar-week">
-                    {week.map(day => (
-                        <div
-                            onClick={onGoToDate(day)}
+            {weekArray.map((week) => (
+                <div className="calendar-week" key={week[0].dateJs.valueOf()}>
+                    {week.map((day) => (
+                        <button
+                            type="button"
+                            key={day.dateJs.valueOf()}
+                            title={fastTitle(day.isFast)}
+                            aria-current={day.isActive ? "date" : undefined}
+                            aria-label={`${day.date} ${monthLabel} ${frameAnchor.year}`}
+                            onClick={() => goToDate(fromFrame(fromDate(day.dateJs.toDate())))}
                             className={
                                 `calendar-day ${
-                                    day.monthValue !== dateValueObject.month() && `calendar-day-not-current-month`} ${
+                                    day.monthValue !== frameAnchor.month - 1 && `calendar-day-not-current-month`} ${
                                     day.isFast && `calendar-day-is-fasting`} ${
                                     day.isEaster && `calendar-day-is-easter`} ${
-                                    day.isToday  && `calendar-day-is-today`} ${
-                                    day.isActive  && `calendar-day-is-active`}`
+                                    day.isToday && `calendar-day-is-today`} ${
+                                    day.isActive && `calendar-day-is-active`}`
                             }
                         >
-                            <span>
-                                {day.date}
-                            </span>
-                            {isJul && (
-                                <span className="secondary">
-                                    {day.dateNew}
-                                </span>
-                            )}
-                        </div>
+                            <span>{day.date}</span>
+                            {isJul && <span className="secondary">{day.dateNew}</span>}
+                        </button>
                     ))}
                 </div>
             ))}
             <div className="calendar-yesterday-tomorrow">
-                <div onClick={onGoYesterday}>
-                    <div className="calendar-chevron">
+                <button type="button" onClick={() => goToDate(addDays(selected, -1))}>
+                    <span className="calendar-chevron">
                         <ChevronLeftIcon />
-                    </div>
+                    </span>
                     Вчера
-                </div>
-                <div onClick={onGoTomorrow}>
+                </button>
+                <button type="button" onClick={() => goToDate(addDays(selected, 1))}>
                     Завтра
-                    <div className="calendar-chevron">
+                    <span className="calendar-chevron">
                         <ChevronRightIcon />
-                    </div>
-                </div>
+                    </span>
+                </button>
             </div>
             <div className="calendar-settings">
                 <div className="calendar-settings-name">
-                    {currentCalendar ? currentCalendar.titles && currentCalendar.titles[0]?.text : `Выбранный календарь`}
+                    {currentCalendar?.titles?.[0]?.text ?? "Выбранный календарь"}
                 </div>
                 <div className="calendar-settings-icon">
                     <Cog6ToothIcon />

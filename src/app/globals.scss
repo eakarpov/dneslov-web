@@ -2,18 +2,81 @@
 @tailwind components;
 @tailwind utilities;
 
+// One palette, two themes. Every colour in the app comes from here, so a dark
+// screen needs no per-component special cases — and nothing can be left behind
+// in light colours by accident.
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --bg: #fbfbfb;
+  --surface: #ffffff;
+  --surface-2: #f2f2f2;
+  --surface-3: #f6f2ee;
+  --text: #1c1a18;
+  --text-muted: #6f6a66;
+  --text-faint: #999590;
+  --border: #ddd6ce;
+  --accent: #ee6e73;
+  --accent-strong: #c5171e;
+  --accent-soft: #f79eb3;
+  --accent-pale: #fbe9ea;
+  --on-accent: #ffffff;
+  --link: #3a6ea5;
+  --warn-bg: #fdf3e3;
+  --warn-text: #7a5c28;
+  --note-bg: #efe6f5;
+  --note-text: #4a3a5a;
+  --kind-bg: #eef2ea;
+  --kind-text: #4a5a42;
+  --event-bg: #eef4fa;
+  --event-text: #3a5a78;
+  --day-today: #afeeee;
+  --day-fast: #ca80f2;
+  --day-easter: crimson;
+  --blank: #f0ece9;
+  // Chips get a hue from the slug and take their lightness from the theme.
+  --chip-bg-l: 92%;
+  --chip-border-l: 78%;
+  --chip-text-l: 28%;
+  --chip-s: 55%;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
+    --bg: #16181a;
+    --surface: #1d2023;
+    --surface-2: #24282c;
+    --surface-3: #262024;
+    --text: #e8e4e0;
+    --text-muted: #a49e98;
+    --text-faint: #7d7873;
+    --border: #3a3f44;
+    --accent: #a8484d;
+    --accent-strong: #8e1218;
+    --accent-soft: #6b3a46;
+    --accent-pale: #2a1f22;
+    --on-accent: #f6efee;
+    --link: #8fb6dd;
+    --warn-bg: #33291a;
+    --warn-text: #e0c48a;
+    --note-bg: #2a2333;
+    --note-text: #cfc0e2;
+    --kind-bg: #232a22;
+    --kind-text: #b6c7ae;
+    --event-bg: #1e2833;
+    --event-text: #a8c6e2;
+    --day-today: #1f4d4d;
+    --day-fast: #4a2a63;
+    --day-easter: #7a1220;
+    --blank: #2a2622;
+    --chip-bg-l: 20%;
+    --chip-border-l: 32%;
+    --chip-text-l: 82%;
+    --chip-s: 35%;
   }
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
 }
 
 @layer utilities {
@@ -23,19 +86,155 @@
 }
 
 .navbar {
-  background: #ee6e73;
+  background: var(--accent);
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.25rem 0.5rem;
+}
+
+.navbar img {
+  max-width: 100%;
+  height: auto;
+}
+
+// The two columns sit side by side on a desktop and stack on a phone.
+.page-shell {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem;
+}
+
+// Without this a long title stops its column from ever shrinking.
+.page-shell > * {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .page-shell {
+    flex-direction: column;
+    margin: 0.5rem;
+  }
+
+  .navbar-links {
+    gap: 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  .navbar-legacy-link {
+    margin-right: 0;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.75rem;
+  }
+}
+
+.navbar-links {
+  display: flex;
+  gap: 1.2rem;
+  color: var(--on-accent);
+}
+
+.navbar-links a:hover,
+.navbar-tour:hover {
+  text-decoration: underline;
+}
+
+.navbar-tour {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.navbar-legacy-link {
+  margin-right: 1rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 0.4rem;
+  background: rgba(255, 255, 255, 0.22);
+  color: var(--on-accent);
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.navbar-legacy-link:hover {
+  background: rgba(255, 255, 255, 0.36);
 }
 
 .chip {
   border-radius: 2rem;
-  color: rgba(47,16,95,0.6);
+  color: var(--text-muted);
   font-size: 90%;
   height: auto;
   line-height: 230%;
   margin: 0.2rem;
   padding: 0 0.8rem;
-  background: #e4e4e4;
+  background: var(--surface-2);
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+// A chip carrying a slug hue takes its lightness from the theme, so the same
+// order or calendary reads correctly on a light and on a dark screen.
+.chip[style*="--chip-h"],
+.source-item[style*="--chip-h"] {
+  background: hsl(var(--chip-h) var(--chip-s) var(--chip-bg-l));
+  border-color: hsl(var(--chip-h) var(--chip-s) var(--chip-border-l));
+  color: hsl(var(--chip-h) var(--chip-s) var(--chip-text-l));
+}
+
+.source-item[style*="--chip-h"][aria-pressed="true"] {
+  background: hsl(var(--chip-h) var(--chip-s) var(--chip-text-l));
+  border-color: hsl(var(--chip-h) var(--chip-s) var(--chip-text-l));
+  color: hsl(var(--chip-h) var(--chip-s) var(--chip-bg-l));
+}
+
+.audio-player-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  margin-left: 0.5rem;
+  border-radius: 50%;
+  background: #ee6e73;
+  cursor: pointer;
+}
+
+.audio-player-icon {
+  width: 1rem;
+  height: 1rem;
+  color: white;
+}
+
+@media print {
+  .navbar,
+  .calendar-wrapper,
+  .source-list,
+  .tour,
+  .lightbox {
+    display: none !important;
+  }
+
+  .page-shell {
+    display: block;
+    margin: 0;
+  }
+
+  a {
+    color: #000;
+    text-decoration: none;
+  }
+
+  // A printed sheet should say which day it is even though the calendar and the
+  // selection chips are gone.
+  .print-header {
+    display: block !important;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.print-header {
+  display: none;
 }

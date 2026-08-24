@@ -1,0 +1,82 @@
+.tour {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+}
+
+.tour-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: auto;
+}
+
+.tour-highlight {
+  position: absolute;
+  border: 2px solid var(--accent-soft);
+  border-radius: 0.4rem;
+  // Punches the highlighted element out of the backdrop without a second layer.
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+  transition: all 0.15s ease-out;
+}
+
+.tour-card {
+  position: absolute;
+  left: 50%;
+  bottom: 2rem;
+  transform: translateX(-50%);
+  width: min(420px, calc(100vw - 2rem));
+  padding: 0.9rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--surface);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.3);
+  pointer-events: auto;
+
+  p {
+    margin: 0 0 0.75rem;
+    font-size: 0.85rem;
+    line-height: 1.35rem;
+  }
+}
+
+.tour-close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-faint);
+  cursor: pointer;
+}
+
+.tour-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  button {
+    border: 0;
+    border-radius: 0.3rem;
+    padding: 0.25rem 0.75rem;
+    background: var(--surface-2);
+    font: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+  }
+}
+
+.tour-progress {
+  flex: 1;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+}
+
+.tour-next {
+  background: var(--accent) !important;
+  color: var(--on-accent);
+}

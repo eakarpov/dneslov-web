@@ -1,37 +1,69 @@
-import {CALENDAR_TYPE} from "../types/index";
+// Server-only fetchers for the day view. Client code imports lib/api/day.
+import { fetchLegacyAnswer } from "../lib/api/host";
+import { normalizeDayList } from "../lib/api/normalize";
+import { swallowOutage } from "../lib/api/load";
+import {
+    EMPTY_CALENDARIES,
+    ICalendaryList,
+    IDayFilters,
+    dayFiltersToParams,
+} from "../lib/api/day";
+import { IDayMemoList } from "../dto/day";
 
-export const getItemsLocal = async (dateTime: string, calendarType: CALENDAR_TYPE, calendarString: string, search: string) => {
-    return fetch(`/api/v1?${encodeURIComponent(
-        `${calendarType === CALENDAR_TYPE.JULIAN ? `ю` : 'н'}${dateTime}&c=${calendarString}&q=${search}`
-    )}`).then(res => res.json()).catch((e) => console.log(e));
-};
+export type { IDayFilters, ICalendaryList };
 
-const getItems = async (dateTime: string, calendarType: CALENDAR_TYPE, calendarString: string) => {
-    return fetch(`http://${process.env.BASE_API_HOST}/index.json?d=${calendarType === CALENDAR_TYPE.JULIAN ? `ю` : 'н'}${dateTime}&c=${calendarString}`)
-        .then(res => res.json()).catch(e => console.log(e));
-};
-
-export const getItemsBatch = async (dateTime: string, calendarString: string, from: number, to: number) => {
-    return fetch(`/api/v1?${encodeURIComponent(
-        // `d=ю${dateTime}&c=${calendarString}`
-        `c=${calendarString}`
-    )}`, {
-        headers: {
-            'Range': `records=${from}-${to}`
-        }
-    }).then(res => res.json()).catch((e) => console.log(e));
-};
-
-export const getCalendariesLocal = (page, count) => {
-    // return Promise.resolve(['рпц', 'нмр', 'днес']);
-    return fetch(`/api/v1/calendaries?page=${page}&per=${count}&licit=true`).then(res => res.json());
+export interface DayMemories {
+    // null when there is nothing live and nothing saved to fall back on.
+    data: IDayMemoList | null;
+    // Served from the last known good copy: the reference did not answer.
+    stale: boolean;
 }
 
-// 185.133.40.112
+// Cached for an hour so a flaky dneslov.org can't stall every render. If it is
+// unreachable, the last known good copy stands in; only when there is no copy
+// at all does the list come back empty, and then it says so rather than
+// pretending the day is empty.
+export const getDayMemories = async (filters: IDayFilters): Promise<DayMemories> => {
+    try {
+        const { data, stale } = await fetchLegacyAnswer(`/index.json?${dayFiltersToParams(filters)}`, {
+            next: { revalidate: 3600 },
+        });
 
-export const getCalendaries = async (page, count) => {
-    // return Promise.resolve(['рпц', 'нмр', 'днес']);
-    return fetch(`http://${process.env.BASE_API_HOST}/calendaries.json?page=${page}&per=${count}&l=true`).then(res => res.json());
-}
+        return { data: normalizeDayList(data), stale };
+    } catch (e) {
+        swallowOutage(e);
+        return { data: null, stale: false };
+    }
+};
 
-export default getItems;
+// A name lookup asks the backend the same question the search box does, just
+// over a wider window: the filtering to actual name matches happens here.
+export const searchMemories = async (query: string, limit = 200): Promise<IDayMemoList | null> => {
+    try {
+        const { data } = await fetchLegacyAnswer(
+            `/index.json?${new URLSearchParams({ q: query })}`,
+            {
+                headers: { Range: `records=0-${limit - 1}` },
+                next: { revalidate: 3600 },
+            },
+        );
+
+        return normalizeDayList(data);
+    } catch (e) {
+        swallowOutage(e);
+        return null;
+    }
+};
+
+export const getCalendaries = async (page = 1, per = 100): Promise<ICalendaryList> => {
+    try {
+        const { data } = await fetchLegacyAnswer(`/calendaries.json?page=${page}&per=${per}&l=true`, {
+            next: { revalidate: 3600 },
+        });
+
+        return data ?? EMPTY_CALENDARIES;
+    } catch (e) {
+        swallowOutage(e);
+        return EMPTY_CALENDARIES;
+    }
+};

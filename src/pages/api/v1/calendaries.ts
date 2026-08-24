@@ -1,15 +1,18 @@
-import {NextApiRequest, NextApiResponse} from "next";
-import axios, {AxiosRequestConfig} from "axios";
+import { NextApiRequest, NextApiResponse } from "next";
+import { pickParams, proxyLegacyJson } from "../../../lib/api/proxy";
+
+const ALLOWED = ["page", "per", "c", "l"] as const;
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
-    if (req.method === 'GET') {
-        console.log(Object.keys(req.query)[0]);
-        return axios.get(`http://${process.env.BASE_API_HOST}/api/v1/calendaries.json?${Object.keys(req.query)[0]}`, {
-        } as AxiosRequestConfig).then((resp) => {
-            res.status(200).json(resp.data);
-            return;
-        }).catch((e) => {
-            res.status(200);
-        });
+    if (req.method !== "GET") {
+        res.setHeader("Allow", "GET");
+        res.status(405).end();
+        return;
     }
+
+    await proxyLegacyJson(req, res, {
+        path: "/calendaries.json",
+        params: pickParams(req, ALLOWED),
+        fallback: { list: [], total: 0 },
+    });
 }

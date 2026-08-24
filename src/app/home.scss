@@ -18,20 +18,255 @@
   margin-right: 24px;
 }
 
+.search-hint {
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  margin-top: 2px;
+}
+
 .selection-container {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   width: 100%;
   align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
-.selection-date {
-  background: #f8f8f8;
+.selection-label {
+  margin-right: 4px;
+}
 
-  & > div {
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: var(--surface-2);
+  font-size: 0.8rem;
+  line-height: 1.4rem;
+  white-space: nowrap;
+  max-width: 100%;
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+.chip-remove {
+  display: flex;
+  flex: 0 0 14px;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.6;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.chip.event {
+  background: var(--event-bg);
+  color: var(--event-text);
+}
+
+.home-list {
+  width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.home-empty {
+  padding: 12px 0;
+  color: var(--text-muted);
+}
+
+.home-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 58px;
+  gap: 0.6rem;
+  padding-right: 0.5rem;
+  box-sizing: border-box;
+}
+
+.home-more {
+  align-self: flex-start;
+  margin-top: 0.75rem;
+  padding: 0.35rem 0.9rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: var(--accent);
+  color: var(--on-accent);
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+}
+
+.home-row-loading {
+  color: var(--text-faint);
+  font-size: 0.85rem;
+}
+
+.home-row-icon {
+  flex: 0 0 32px;
+  width: 32px;
+  height: 32px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+}
+
+// Keeps the row grid aligned when a memory has no roundel, instead of the
+// title jumping left.
+.home-row-icon-blank {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--blank);
+}
+
+.home-row-orders {
+  display: flex;
+  flex: 0 0 5.5rem;
+  width: 5.5rem;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.home-row-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.home-row-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+// min-width:0 is what lets the ellipsis work inside a flex child.
+// The title gets the free space and the event chip yields to it — a row whose
+// name is cut to "Память ..." while the chip keeps its full width is useless.
+.home-row-title {
+  flex: 1 1 auto;
+  min-width: 4rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chip.event {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-row-note {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.home-stale {
+  margin-bottom: 8px;
+  padding: 0.35rem 0.6rem;
+  border-radius: 0.35rem;
+  background: var(--warn-bg);
+  color: var(--warn-text);
+  font-size: 0.78rem;
+}
+
+.day-ics {
+  margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--link);
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+@media (max-width: 900px) {
+  .chip.event {
+    max-width: 40%;
+  }
+
+  .home-row-orders {
+    flex: 0 0 4rem;
+    width: 4rem;
+  }
+
+  .day-ics {
+    margin-left: 0;
+  }
+
+  .search-icon {
+    margin-right: 12px;
+  }
+}
+
+// Printing a day. Everything that exists to navigate is dropped; what remains
+// is the day itself and its memories.
+// Paper is white whatever the screen is, so the print block keeps plain ink
+// colours rather than theme tokens.
+@media print {
+  .search-container,
+  .selection-container,
+  .home-more,
+  .home-stale,
+  .day-ics {
+    display: none !important;
+  }
+
+  .home-row {
+    min-height: 0;
+    padding: 0.15rem 0;
+    break-inside: avoid;
+  }
+
+  .home-row-icon {
+    display: none;
+  }
+
+  .home-row-title {
+    white-space: normal;
+    overflow: visible;
+  }
+
+  .home-row-note {
+    white-space: normal;
+    overflow: visible;
+    color: #444;
+  }
+
+  .chip {
+    border: 1px solid #999;
+    background: none !important;
+    color: #000 !important;
   }
 }
