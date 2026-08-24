@@ -18,26 +18,74 @@
   margin-right: 24px;
 }
 
+.search-hint {
+  font-size: 0.7rem;
+  color: #999;
+  margin-top: 2px;
+}
+
 .selection-container {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   width: 100%;
   align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
 }
 
-.selection-date {
-  background: #f8f8f8;
+.selection-label {
+  margin-right: 4px;
+}
 
-  & > div {
-    width: 16px;
-    height: 16px;
-    cursor: pointer;
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: #f2f2f2;
+  font-size: 0.8rem;
+  line-height: 1.4rem;
+  white-space: nowrap;
+  max-width: 100%;
+
+  > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
+}
+
+.chip-remove {
+  display: flex;
+  flex: 0 0 14px;
+  width: 14px;
+  height: 14px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.6;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.chip.event {
+  background: #eef4fa;
+  color: #3a5a78;
 }
 
 .home-list {
   width: 100%;
+}
+
+.home-empty {
+  padding: 12px 0;
+  color: #777;
 }
 
 .home-row {
@@ -47,6 +95,11 @@
   gap: 0.6rem;
   padding-right: 0.5rem;
   box-sizing: border-box;
+}
+
+.home-row-loading {
+  color: #999;
+  font-size: 0.85rem;
 }
 
 .home-row-icon {
@@ -62,15 +115,22 @@
   }
 }
 
-.home-row-chip {
-  flex: 0 0 4.5rem;
-  width: 4.5rem;
-  overflow: hidden;
+// Keeps the row grid aligned when a memory has no roundel, instead of the
+// title jumping left.
+.home-row-icon-blank {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #f0ece9;
+}
 
-  .chip {
-    width: 100%;
-    box-sizing: border-box;
-  }
+.home-row-orders {
+  display: flex;
+  flex: 0 0 5.5rem;
+  width: 5.5rem;
+  gap: 2px;
+  overflow: hidden;
 }
 
 .home-row-text {
@@ -81,7 +141,16 @@
   justify-content: center;
 }
 
+.home-row-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+// min-width:0 is what lets the ellipsis work inside a flex child.
 .home-row-title {
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

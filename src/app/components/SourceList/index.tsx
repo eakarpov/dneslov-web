@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { ICalendar } from "../../../dto/calendar";
 import { IDayFilters, fetchCalendaries } from "../../../lib/api/day";
 import { buildListHref } from "../../../lib/routes";
+import { slugChipColors } from "../../../lib/colors";
 
 const PER_PAGE = 100;
 
@@ -65,17 +66,31 @@ const SourceList = ({ items, total, filters, defaultCalendaries }: SourceListPro
 
     return (
         <div className="source-list" onScroll={onScroll}>
-            {all.map((calendary) => (
-                <div
-                    key={calendary.id}
-                    className={`source-item ${
-                        selected.has(calendary.slug?.text) ? "source-item-is-active" : ""
-                    }`}
-                    onClick={onToggle(calendary)}
-                >
-                    {calendary.titles?.[0]?.text ?? calendary.slug?.text}
-                </div>
-            ))}
+            {all.map((calendary) => {
+                const slug = calendary.slug?.text;
+                const isActive = selected.has(slug);
+                const colors = slugChipColors(slug);
+
+                return (
+                    <button
+                        type="button"
+                        key={calendary.id}
+                        aria-pressed={isActive}
+                        // The colour is derived from the slug, so a calendary
+                        // looks the same here and in the selection chips.
+                        style={
+                            isActive
+                                ? { background: colors?.color, color: "#fff", borderColor: colors?.color }
+                                : colors
+                        }
+                        className={`source-item ${isActive ? "source-item-is-active" : ""}`}
+                        title={calendary.descriptions?.[0]?.text}
+                        onClick={onToggle(calendary)}
+                    >
+                        {calendary.titles?.[0]?.text ?? slug}
+                    </button>
+                );
+            })}
         </div>
     );
 };

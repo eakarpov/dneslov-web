@@ -1,17 +1,24 @@
 'use client';
 import { AutoSizer, List, InfiniteLoader } from "react-virtualized";
-import { memo, useCallback, useEffect, useState } from "react";
-import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/solid";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fetchDayMemories, IDayFilters } from "../../lib/api/day";
 import { IDayMemo, IDayMemoList } from "../../dto/day";
-import { buildListHref, memoryHref } from "../../lib/routes";
+import { buildListHref, eventHref, memoryHref } from "../../lib/routes";
 import { formatHuman } from "../../lib/dates/civil";
+import { normalizeQuery, parseQueryGroups, removeQueryGroup } from "../../lib/search";
+import { slugChipColors } from "../../lib/colors";
+import Chip from "../components/Chip";
 import "../home.scss";
 
 const ROW_HEIGHT = 58;
 const LIST_HEIGHT = 600;
+// Long enough not to fire a request per keystroke, short enough that the list
+// follows typing. The monolith waits 1.5s, which reads as the site being stuck.
+const SEARCH_DEBOUNCE_MS = 700;
+const UNBOUND = "несвязаный";
 
 interface DayListProps {
     items: IDayMemoList;
@@ -25,15 +32,92 @@ interface DayListProps {
 const indexRows = (list: IDayMemo[], offset = 0): Record<number, IDayMemo> =>
     Object.fromEntries(list.map((item, index) => [offset + index, item]));
 
-const DayList = ({ items, unavailable, filters, defaultCalendaries, calendaryTitles }: DayListProps) => {
+const DayRow = ({ item }: { item: IDayMemo }) => {
+    const [roundelFailed, setRoundelFailed] = useState(false);
+    const orders = Object.entries(item.orders ?? {});
+    const eventChipText = [
+        item.bind_kind_code && item.bind_kind_code !== UNBOUND ? item.bind_kind_code : null,
+        item.event_title,
+        item.happened_at,
+    ]
+        .filter(Boolean)
+        .join(", ");
+
+    return (
+        <>
+            <div className="home-row-icon">
+                {item.roundel_url && !roundelFailed ? (
+                    <img
+                        src={item.roundel_url}
+                        alt=""
+                        referrerPolicy="no-referrer"
+                        onError={() => setRoundelFailed(true)}
+                    />
+                ) : (
+                    <span className="home-row-icon-blank" aria-hidden="true" />
+                )}
+            </div>
+            <div className="home-row-orders">
+                {orders.map(([slug, shortName]) => (
+                    <Chip
+                        key={slug}
+                        text={shortName ?? slug}
+                        title={slug}
+                        className="order"
+                        colors={slugChipColors(slug)}
+                    />
+                ))}
+            </div>
+            <div className="home-row-text">
+                <div className="home-row-line">
+                    <span className="home-row-title" title={item.title}>
+                        {item.slug ? (
+                            <Link href={memoryHref(item.slug)}>{item.title}</Link>
+                        ) : (
+                            item.title
+                        )}
+                    </span>
+                    {eventChipText && (
+                        <Chip
+                            text={eventChipText}
+                            className="event"
+                            url={item.slug && item.event_id ? eventHref(item.slug, item.event_id) : undefined}
+                        />
+                    )}
+                </div>
+                {item.note && (
+                    <div className="home-row-note" title={item.note}>
+                        {item.note}
+                    </div>
+                )}
+            </div>
+        </>
+    );
+};
+
+const DayList = ({
+    items,
+    unavailable,
+    filters,
+    defaultCalendaries,
+    calendaryTitles,
+}: DayListProps) => {
     const router = useRouter();
 
     const [searchValue, setSearchValue] = useState(filters.query);
     const [rows, setRows] = useState<Record<number, IDayMemo>>(() => indexRows(items.list));
     // react-virtualized measures the DOM, so it can only run after mount.
     const [mounted, setMounted] = useState(false);
+    const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => setMounted(true), []);
+
+    useEffect(
+        () => () => {
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+        },
+        [],
+    );
 
     // A new server render (i.e. a new URL) replaces the list wholesale — the
     // rows we had belong to the previous filters.
@@ -42,18 +126,39 @@ const DayList = ({ items, unavailable, filters, defaultCalendaries, calendaryTit
         setSearchValue(filters.query);
     }, [items, filters.query]);
 
-    const navigate = useCallback(
-        (next: Partial<IDayFilters>) => {
-            router.push(buildListHref({ ...filters, ...next }, defaultCalendaries));
-        },
-        [router, filters, defaultCalendaries],
+    const hrefFor = useCallback(
+        (next: Partial<IDayFilters>) => buildListHref({ ...filters, ...next }, defaultCalendaries),
+        [filters, defaultCalendaries],
     );
 
-    const onSubmitSearch = useCallback(
+    const navigate = useCallback(
+        (next: Partial<IDayFilters>) => {
+            router.push(hrefFor(next));
+        },
+        [router, hrefFor],
+    );
+
+    const onSearchChange = useCallback(
+        (e: React.ChangeEvent<HTMLInputElement>) => {
+            const value = e.target.value;
+            setSearchValue(value);
+
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+            debounceRef.current = setTimeout(() => {
+                // replace, not push: typing should not bury the previous view
+                // under a history entry per pause.
+                router.replace(hrefFor({ query: normalizeQuery(value) }));
+            }, SEARCH_DEBOUNCE_MS);
+        },
+        [router, hrefFor],
+    );
+
+    const onSearchKeyDown = useCallback(
         (e: React.KeyboardEvent<HTMLInputElement>) => {
-            if (e.key === "Enter") {
-                navigate({ query: searchValue.trim() });
-            }
+            if (e.key !== "Enter") return;
+
+            if (debounceRef.current) clearTimeout(debounceRef.current);
+            navigate({ query: normalizeQuery(searchValue) });
         },
         [navigate, searchValue],
     );
@@ -62,8 +167,8 @@ const DayList = ({ items, unavailable, filters, defaultCalendaries, calendaryTit
 
     const loadMoreRows = useCallback(
         async ({ startIndex, stopIndex }: { startIndex: number; stopIndex: number }) => {
-            // Paging now carries the *active* filters. It used to send only `c`,
-            // so scrolling mixed in rows the current date/query excluded.
+            // Paging carries the *active* filters. It used to send only `c`, so
+            // scrolling mixed in rows the current date/query excluded.
             const batch = await fetchDayMemories(filters, startIndex, stopIndex);
             setRows((prev) => ({ ...prev, ...indexRows(batch.list ?? [], startIndex) }));
         },
@@ -74,48 +179,16 @@ const DayList = ({ items, unavailable, filters, defaultCalendaries, calendaryTit
         ({ index, key, style }: { index: number; key: string; style: React.CSSProperties }) => {
             const item = rows[index];
 
-            if (!item) {
-                return (
-                    <div className="home-row" key={key} style={style}>
-                        <div>Загрузка...</div>
-                    </div>
-                );
-            }
-
-            const title = item.happened_at ? `${item.title} (${item.happened_at})` : item.title;
-            const order = item.orders ? Object.values(item.orders)[0] : null;
-
             return (
                 <div className="home-row" key={key} style={style}>
-                    <div className="home-row-icon">
-                        {item.roundel_url && (
-                            <img src={item.roundel_url} alt="" referrerPolicy="no-referrer" />
-                        )}
-                    </div>
-                    <div className="home-row-chip">
-                        <div className="chip">{order}</div>
-                    </div>
-                    <div className="home-row-text">
-                        <div className="home-row-title">
-                            {item.slug ? (
-                                <Link href={memoryHref(item.slug)} title={title}>
-                                    {title}
-                                </Link>
-                            ) : (
-                                <span title={title}>{title}</span>
-                            )}
-                        </div>
-                        {item.note && (
-                            <div className="home-row-note" title={item.note}>
-                                {item.note}
-                            </div>
-                        )}
-                    </div>
+                    {item ? <DayRow item={item} /> : <div className="home-row-loading">Загрузка...</div>}
                 </div>
             );
         },
         [rows],
     );
+
+    const queryGroups = parseQueryGroups(filters.query);
 
     return (
         <div className="flex flex-col w-full">
@@ -131,8 +204,8 @@ const DayList = ({ items, unavailable, filters, defaultCalendaries, calendaryTit
                             className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none dark:text-white dark:border-gray-600 dark:focus:border-blue-500 focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                             placeholder=" "
                             value={searchValue}
-                            onChange={(e) => setSearchValue(e.target.value)}
-                            onKeyDown={onSubmitSearch}
+                            onChange={onSearchChange}
+                            onKeyDown={onSearchKeyDown}
                         />
                         <label
                             htmlFor="day-search"
@@ -140,44 +213,46 @@ const DayList = ({ items, unavailable, filters, defaultCalendaries, calendaryTit
                         >
                             Что ищем?
                         </label>
+                        <div className="search-hint">
+                            Пробел — все слова, «/» — любое из них
+                        </div>
                     </div>
                 </div>
             </div>
 
             <div className="selection-container">
-                <div>Выборка:</div>
+                <div className="selection-label">Выборка:</div>
                 {filters.date && (
-                    <div className="chip selection-date">
-                        {formatHuman(filters.date)}
-                        <div onClick={() => navigate({ date: null })} role="button" aria-label="Убрать дату">
-                            <XMarkIcon />
-                        </div>
-                    </div>
+                    <Chip
+                        text={formatHuman(filters.date)}
+                        className="selection"
+                        onRemove={() => navigate({ date: null })}
+                        removeLabel="Убрать дату"
+                    />
                 )}
                 {filters.calendaries.map((slug) => (
-                    <div className="chip selection-date" key={slug}>
-                        {calendaryTitles[slug] ?? slug}
-                        <div
-                            role="button"
-                            aria-label="Убрать календарь"
-                            onClick={() =>
-                                navigate({
-                                    calendaries: filters.calendaries.filter((item) => item !== slug),
-                                })
-                            }
-                        >
-                            <XMarkIcon />
-                        </div>
-                    </div>
+                    <Chip
+                        key={slug}
+                        text={calendaryTitles[slug] ?? slug}
+                        className="selection"
+                        colors={slugChipColors(slug)}
+                        onRemove={() =>
+                            navigate({
+                                calendaries: filters.calendaries.filter((item) => item !== slug),
+                            })
+                        }
+                        removeLabel="Убрать календарь"
+                    />
                 ))}
-                {filters.query && (
-                    <div className="chip selection-date">
-                        {filters.query}
-                        <div role="button" aria-label="Убрать запрос" onClick={() => navigate({ query: "" })}>
-                            <XMarkIcon />
-                        </div>
-                    </div>
-                )}
+                {queryGroups.map((group, index) => (
+                    <Chip
+                        key={`${group}-${index}`}
+                        text={group}
+                        className="selection query"
+                        onRemove={() => navigate({ query: removeQueryGroup(filters.query, index) })}
+                        removeLabel="Убрать слово"
+                    />
+                ))}
             </div>
 
             {unavailable && (
@@ -190,7 +265,11 @@ const DayList = ({ items, unavailable, filters, defaultCalendaries, calendaryTit
             )}
 
             {mounted && items.total > 0 && (
-                <InfiniteLoader isRowLoaded={isRowLoaded} loadMoreRows={loadMoreRows} rowCount={items.total}>
+                <InfiniteLoader
+                    isRowLoaded={isRowLoaded}
+                    loadMoreRows={loadMoreRows}
+                    rowCount={items.total}
+                >
                     {({ onRowsRendered, registerChild }) => (
                         <AutoSizer disableHeight className="home-list">
                             {({ width }) => (

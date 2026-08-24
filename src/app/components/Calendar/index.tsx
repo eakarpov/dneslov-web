@@ -24,6 +24,22 @@ import { DEFAULT_PREFERENCES, readPreferences, writePreferences } from "../../..
 
 const isSundayFirst = true;
 
+const MONTHS = [
+    "январь", "февраль", "март", "апрель", "май", "июнь",
+    "июль", "август", "сентябрь", "октябрь", "ноябрь", "декабрь",
+];
+
+const FAST_TITLES: Record<string, string> = {
+    meat: "без мяса",
+    egg: "без яиц",
+    milk: "без молочного",
+    butter: "без масла",
+    fish: "без рыбы",
+};
+
+const fastTitle = (fast: unknown): string | undefined =>
+    typeof fast === "string" ? FAST_TITLES[fast] ?? "постный день" : fast ? "постный день" : undefined;
+
 interface CalendarProps {
     filters: IDayFilters;
     defaultCalendaries: string[];
@@ -52,6 +68,7 @@ const Calendar = ({ filters, defaultCalendaries, calendaries }: CalendarProps) =
 
     // Which month the grid shows; follows the selection but can be paged away.
     const [anchor, setAnchor] = useState<DateParts>(selected);
+    const [pickerOpen, setPickerOpen] = useState(false);
     useEffect(() => {
         if (filters.date) setAnchor(filters.date);
     }, [selectedKey]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -74,6 +91,21 @@ const Calendar = ({ filters, defaultCalendaries, calendaries }: CalendarProps) =
         (months: number) => {
             const shifted = dayjs(toDate(frameAnchor)).add(months, "month");
             setAnchor(fromFrame(fromDate(shifted.toDate())));
+        },
+        [frameAnchor, fromFrame],
+    );
+
+    const pickMonth = useCallback(
+        (month: number) => {
+            setAnchor(fromFrame({ ...frameAnchor, month, day: 1 }));
+            setPickerOpen(false);
+        },
+        [frameAnchor, fromFrame],
+    );
+
+    const shiftYear = useCallback(
+        (years: number) => {
+            setAnchor(fromFrame({ ...frameAnchor, year: frameAnchor.year + years, day: 1 }));
         },
         [frameAnchor, fromFrame],
     );
@@ -117,13 +149,43 @@ const Calendar = ({ filters, defaultCalendaries, calendaries }: CalendarProps) =
                 <div className="calendar-chevron" onClick={() => shiftMonth(-1)}>
                     <ChevronLeftIcon />
                 </div>
-                <div className="calendar-month">
+                <button
+                    type="button"
+                    className="calendar-month"
+                    aria-expanded={pickerOpen}
+                    onClick={() => setPickerOpen((open) => !open)}
+                >
                     {monthLabel}, {frameAnchor.year}
-                </div>
+                </button>
                 <div className="calendar-chevron" onClick={() => shiftMonth(1)}>
                     <ChevronRightIcon />
                 </div>
             </div>
+            {pickerOpen && (
+                <div className="calendar-picker">
+                    <div className="calendar-picker-year">
+                        <button type="button" onClick={() => shiftYear(-1)} aria-label="Предыдущий год">
+                            <ChevronLeftIcon />
+                        </button>
+                        <span>{frameAnchor.year}</span>
+                        <button type="button" onClick={() => shiftYear(1)} aria-label="Следующий год">
+                            <ChevronRightIcon />
+                        </button>
+                    </div>
+                    <div className="calendar-picker-months">
+                        {MONTHS.map((name, index) => (
+                            <button
+                                type="button"
+                                key={name}
+                                className={index + 1 === frameAnchor.month ? "calendar-picker-active" : ""}
+                                onClick={() => pickMonth(index + 1)}
+                            >
+                                {name.slice(0, 3)}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
             <div className="calendar-week-days">
                 {isSundayFirst && <div>Вс</div>}
                 <div>Пн</div>
@@ -139,6 +201,7 @@ const Calendar = ({ filters, defaultCalendaries, calendaries }: CalendarProps) =
                     {week.map((day) => (
                         <div
                             key={day.dateJs.valueOf()}
+                            title={fastTitle(day.isFast)}
                             onClick={() => goToDate(fromFrame(fromDate(day.dateJs.toDate())))}
                             className={
                                 `calendar-day ${

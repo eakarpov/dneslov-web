@@ -37,6 +37,7 @@ export interface ICalendar {
     id: number;
     slug: ISlug;
     titles: ICalendarTitle[];
-    description: ICalendarTitle[];
+    // Real payload key is plural — `description` never existed on the wire.
+    descriptions?: ICalendarTitle[];
     meta: ICalendarMeta;
 }

@@ -37,6 +37,54 @@
     flex: 1;
     align-items: center;
     justify-content: center;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.calendar-picker {
+    background: #fbe9ea;
+    padding: 6px;
+}
+
+.calendar-picker-year {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 6px;
+
+    button {
+        display: flex;
+        width: 16px;
+        height: 16px;
+        border: 0;
+        padding: 0;
+        background: none;
+        cursor: pointer;
+    }
+}
+
+.calendar-picker-months {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px;
+
+    button {
+        border: 0;
+        border-radius: 4px;
+        padding: 3px 0;
+        background: #fff;
+        font-size: 0.75rem;
+        cursor: pointer;
+    }
+}
+
+.calendar-picker-active {
+    background: #ee6e73 !important;
+    color: #fff;
 }
 
 .calendar-week-days {
