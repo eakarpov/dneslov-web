@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { fetchDayMemories, IDayFilters } from "../../lib/api/day";
 import { IDayMemo, IDayMemoList } from "../../dto/day";
 import { buildListHref, dayCalendarHref, eventHref, memoryHref } from "../../lib/routes";
-import { civilToJulian, formatHuman } from "../../lib/dates/civil";
+import { civilToJulian, formatCivilISO, formatHuman } from "../../lib/dates/civil";
 import { normalizeQuery, parseQueryGroups, removeQueryGroup } from "../../lib/search";
 import { slugChipHue } from "../../lib/colors";
 import { sameSlugs, writePreferences } from "../../lib/preferences";
@@ -268,6 +268,11 @@ const DayList = ({
                         removeLabel="Убрать слово"
                     />
                 ))}
+                {filters.date && (
+                    <Link className="day-compare" href={`/day/${formatCivilISO(filters.date)}/compare`}>
+                        Сравнить календари
+                    </Link>
+                )}
                 {icsHref && (
                     <a className="day-ics" href={icsHref} download>
                         Скачать день (.ics)

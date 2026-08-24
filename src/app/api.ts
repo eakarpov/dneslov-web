@@ -23,9 +23,15 @@ export interface DayMemories {
 // unreachable, the last known good copy stands in; only when there is no copy
 // at all does the list come back empty, and then it says so rather than
 // pretending the day is empty.
-export const getDayMemories = async (filters: IDayFilters): Promise<DayMemories> => {
+export const getDayMemories = async (
+    filters: IDayFilters,
+    // The backend hands out 25 rows unless asked otherwise; comparing two
+    // calendaries needs the whole day, not its first page.
+    limit?: number,
+): Promise<DayMemories> => {
     try {
         const { data, stale } = await fetchLegacyAnswer(`/index.json?${dayFiltersToParams(filters)}`, {
+            headers: limit ? { Range: `records=0-${limit - 1}` } : undefined,
             next: { revalidate: 3600 },
         });
 

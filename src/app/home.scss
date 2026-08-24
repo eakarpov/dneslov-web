@@ -203,8 +203,15 @@
   font-size: 0.78rem;
 }
 
-.day-ics {
+.day-compare {
   margin-left: auto;
+  font-size: 0.75rem;
+  color: var(--link);
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.day-ics {
   font-size: 0.75rem;
   color: var(--link);
   text-decoration: underline;
@@ -221,7 +228,7 @@
     width: 4rem;
   }
 
-  .day-ics {
+  .day-compare {
     margin-left: 0;
   }
 
@@ -239,6 +246,7 @@
   .selection-container,
   .home-more,
   .home-stale,
+  .day-compare,
   .day-ics {
     display: none !important;
   }
