@@ -11,6 +11,7 @@ import { normalizeQuery, parseQueryGroups, removeQueryGroup } from "../../lib/se
 import { slugChipHue } from "../../lib/colors";
 import { sameSlugs, writePreferences } from "../../lib/preferences";
 import Chip from "../components/Chip";
+import DayAudio from "../components/DayAudio";
 import Markdown from "../../lib/markdown";
 import "../home.scss";
 
@@ -273,6 +274,8 @@ const DayList = ({
                     </a>
                 )}
             </div>
+
+            {filters.date && rows.length > 0 && <DayAudio rows={rows} />}
 
             {stale && (
                 <div className="home-stale">

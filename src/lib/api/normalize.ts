@@ -12,6 +12,20 @@ export const normalizeDayList = (data: IDayMemoList): IDayMemoList => ({
     })),
 });
 
-// memories#show returns image_url host-relative.
+// memories#show returns image_url — and some scripta audio — host-relative.
 export const normalizeMemory = (data: IMemory | null): IMemory | null =>
-    data && { ...data, image_url: resolveApiAssetUrl(data.image_url) };
+    data && {
+        ...data,
+        image_url: resolveApiAssetUrl(data.image_url),
+        scripta: data.scripta?.map((scriptum) => ({
+            ...scriptum,
+            audio_url: resolveApiAssetUrl(scriptum.audio_url),
+        })),
+        events: data.events?.map((event) => ({
+            ...event,
+            scripta: event.scripta?.map((scriptum) => ({
+                ...scriptum,
+                audio_url: resolveApiAssetUrl(scriptum.audio_url),
+            })),
+        })),
+    };

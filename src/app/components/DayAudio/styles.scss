@@ -1,0 +1,102 @@
+.day-audio-start,
+.day-audio-empty {
+  align-self: flex-start;
+  margin-bottom: 0.5rem;
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 0.35rem;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.day-audio-empty {
+  cursor: default;
+  color: var(--text-muted);
+}
+
+.day-audio-start:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.day-audio {
+  margin-bottom: 0.75rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.4rem;
+  background: var(--surface-2);
+}
+
+.day-audio-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 5px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+  }
+}
+
+.day-audio-play {
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+}
+
+.day-audio-now {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.4rem;
+  min-width: 0;
+  font-size: 0.8rem;
+}
+
+.day-audio-track {
+  color: var(--text-muted);
+}
+
+.day-audio-count {
+  color: var(--text-faint);
+}
+
+.day-audio-list {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+  max-height: 12rem;
+  overflow-y: auto;
+  font-size: 0.78rem;
+
+  button {
+    border: 0;
+    padding: 0.1rem 0;
+    background: none;
+    color: var(--text-muted);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  button[aria-current] {
+    color: var(--text);
+    font-weight: 600;
+  }
+}
+
+@media print {
+  .day-audio,
+  .day-audio-start,
+  .day-audio-empty {
+    display: none !important;
+  }
+}
