@@ -3,10 +3,14 @@ import { Inter } from "next/font/google";
 import "./globals.scss";
 import StoreProvider from "./StoreProvider";
 import Navbar from "./common/Navbar";
+import { SITE_URL } from "../lib/site";
 
 const inter = Inter({ subsets: ["cyrillic-ext"] });
 
 export const metadata: Metadata = {
+  // Without this, canonical and og:url come out relative and resolve against
+  // whatever host happens to serve the page.
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Днеслов",
     template: "%s",

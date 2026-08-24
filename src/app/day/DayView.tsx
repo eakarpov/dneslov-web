@@ -1,17 +1,11 @@
-import { getCalendaries, getDayMemories, IDayFilters } from "../api";
+import { getDayMemories } from "../api";
+import { resolveDay } from "./resolve";
 import { DateParts } from "../../lib/dates/civil";
 import Calendar from "../components/Calendar/index";
 import SourceList from "../components/SourceList/index";
 import DayList from "./DayList";
 import Tour from "../components/Tour";
 import FastLine from "../components/FastLine";
-
-// Mirrors the backend's own default (CoreFeatures#default_calendary_slugs).
-// Used when the calendary list itself could not be fetched: sending no `c` at
-// all leaves the backend resolving titles in днес+рпц while listing memoes from
-// every calendary, so rows from elsewhere come back with no title. Naming the
-// same default keeps the list and the visible selection consistent.
-const FALLBACK_CALENDARIES = ["днес", "рпц"];
 
 export interface DayViewProps {
     date: DateParts | null;
@@ -21,28 +15,19 @@ export interface DayViewProps {
 }
 
 const DayView = async ({ date, query, calendaries: requested }: DayViewProps) => {
-    const calendaries = await getCalendaries();
-
     // The default selection is the licit calendaries, and it is sent to the
     // backend explicitly: the legacy default (днес,рпц) is invisible to the UI,
     // so relying on it would show a selection that doesn't match the results.
-    const licit = calendaries.list
-        .filter((calendary) => calendary.licit)
-        .map((calendary) => calendary.slug?.text)
-        .filter((slug): slug is string => Boolean(slug));
-
-    const defaultCalendaries = licit.length > 0 ? licit : FALLBACK_CALENDARIES;
-
-    const filters: IDayFilters = {
+    const { calendaries, calendariesTotal, defaultCalendaries, filters } = await resolveDay(
         date,
-        calendaries: requested ?? defaultCalendaries,
         query,
-    };
+        requested,
+    );
 
     const { data: items, stale } = await getDayMemories(filters);
 
     const calendaryTitles = Object.fromEntries(
-        calendaries.list
+        calendaries
             .filter((calendary) => calendary.slug?.text)
             .map((calendary) => [
                 calendary.slug.text,
@@ -57,21 +42,21 @@ const DayView = async ({ date, query, calendaries: requested }: DayViewProps) =>
                 <Calendar
                     filters={filters}
                     defaultCalendaries={defaultCalendaries}
-                    calendaries={calendaries.list}
+                    calendaries={calendaries}
                 />
                 {date && (
                     <FastLine
                         date={date}
                         fastDays={
-                            calendaries.list.find((calendary) =>
+                            calendaries.find((calendary) =>
                                 filters.calendaries.includes(calendary.slug?.text),
                             )?.meta?.fast_days
                         }
                     />
                 )}
                 <SourceList
-                    items={calendaries.list}
-                    total={calendaries.total}
+                    items={calendaries}
+                    total={calendariesTotal}
                     filters={filters}
                     defaultCalendaries={defaultCalendaries}
                 />

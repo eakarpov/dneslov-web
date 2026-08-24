@@ -1,5 +1,7 @@
 import {memo} from "react";
 import MemoryPage from "./MemoryPage";
+import JsonLd from "../../components/JsonLd";
+import {memoryJsonLd} from "../../../lib/jsonld";
 import {IMemory} from "../../../dto/memory";
 
 interface ContentProps {

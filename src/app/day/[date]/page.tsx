@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import DayView from "../DayView";
+import { parseCalendaries } from "../resolve";
 import {
     churchTodayISO,
     civilToJulian,
@@ -15,12 +16,6 @@ interface PageProps {
     params: { date: string };
     searchParams: { c?: string; q?: string };
 }
-
-const readCalendaries = (value?: string): string[] | null => {
-    if (!value) return null;
-    const slugs = value.split(",").map((slug) => slug.trim()).filter(Boolean);
-    return slugs.length > 0 ? slugs : null;
-};
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
     const date = parseCivilISO(params.date);
@@ -54,7 +49,7 @@ export default function DayPage({ params, searchParams }: PageProps) {
             <DayView
                 date={date}
                 query={searchParams.q ?? ""}
-                calendaries={readCalendaries(searchParams.c)}
+                calendaries={parseCalendaries(searchParams.c)}
             />
         </Suspense>
     );

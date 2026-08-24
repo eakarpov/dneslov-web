@@ -1,5 +1,6 @@
 import { NextRequest } from "next/server";
-import { getCalendaries, getDayMemories } from "../../../api";
+import { getDayMemories } from "../../../api";
+import { parseCalendaries, resolveDay } from "../../resolve";
 import { parseCivilISO } from "../../../../lib/dates/civil";
 import { buildDayCalendar, IcsEntry } from "../../../../lib/ics";
 import { memoryHref } from "../../../../lib/routes";
@@ -14,20 +15,13 @@ export async function GET(request: NextRequest, { params }: { params: { date: st
         return new Response("Not found", { status: 404 });
     }
 
-    const requested = request.nextUrl.searchParams.get("c");
-    const query = request.nextUrl.searchParams.get("q") ?? "";
+    const { filters } = await resolveDay(
+        date,
+        request.nextUrl.searchParams.get("q") ?? "",
+        parseCalendaries(request.nextUrl.searchParams.get("c")),
+    );
 
-    const calendaries = await getCalendaries();
-    const licit = calendaries.list
-        .filter((calendary) => calendary.licit)
-        .map((calendary) => calendary.slug?.text)
-        .filter((slug): slug is string => Boolean(slug));
-
-    const selected = requested
-        ? requested.split(",").map((slug) => slug.trim()).filter(Boolean)
-        : licit;
-
-    const { data } = await getDayMemories({ date, calendaries: selected, query });
+    const { data } = await getDayMemories(filters);
 
     const origin = request.nextUrl.origin;
     const entries: IcsEntry[] = (data?.list ?? [])

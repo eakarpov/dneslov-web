@@ -1,5 +1,7 @@
 import {memo} from "react";
 import ImagePage from "./ImagePage";
+import JsonLd from "../../components/JsonLd";
+import {imageJsonLd} from "../../../lib/jsonld";
 import {IGalleryImageDetail} from "../../../dto/gallery";
 
 interface ContentProps {
@@ -10,7 +12,10 @@ const Content = async ({ imagePromise }: ContentProps) => {
     const image = await imagePromise;
 
     return (
-        <ImagePage image={image} />
+        <>
+            {image && <JsonLd data={imageJsonLd(image)} />}
+            <ImagePage image={image} />
+        </>
     );
 };
 

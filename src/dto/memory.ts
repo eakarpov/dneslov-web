@@ -34,6 +34,11 @@ export interface IMemory {
     id: number;
     slug: string;
     short_name?: string;
+    // Memory subclass on the backend: Identity, Place, Building, Council,
+    // Group, Thing, Concept, Order, Subsisten. Verified on a real payload.
+    type?: string;
+    kind?: string;
+    quantity?: string | number | null;
     base_year?: number;
     description?: string;
     names: IMemoryName[];

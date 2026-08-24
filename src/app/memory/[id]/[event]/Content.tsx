@@ -1,5 +1,7 @@
 import {memo} from "react";
 import EventPage from "./EventPage";
+import JsonLd from "../../../components/JsonLd";
+import {eventJsonLd} from "../../../../lib/jsonld";
 import {IEvent} from "../../../../dto/event";
 
 interface ContentProps {
