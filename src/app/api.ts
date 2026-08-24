@@ -36,6 +36,25 @@ export const getDayMemories = async (filters: IDayFilters): Promise<DayMemories>
     }
 };
 
+// A name lookup asks the backend the same question the search box does, just
+// over a wider window: the filtering to actual name matches happens here.
+export const searchMemories = async (query: string, limit = 200): Promise<IDayMemoList | null> => {
+    try {
+        const { data } = await fetchLegacyAnswer(
+            `/index.json?${new URLSearchParams({ q: query })}`,
+            {
+                headers: { Range: `records=0-${limit - 1}` },
+                next: { revalidate: 3600 },
+            },
+        );
+
+        return normalizeDayList(data);
+    } catch (e) {
+        swallowOutage(e);
+        return null;
+    }
+};
+
 export const getCalendaries = async (page = 1, per = 100): Promise<ICalendaryList> => {
     try {
         const { data } = await fetchLegacyAnswer(`/calendaries.json?page=${page}&per=${per}&l=true`, {

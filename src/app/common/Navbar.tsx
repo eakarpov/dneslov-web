@@ -18,6 +18,7 @@ const Navbar = () => {
             <nav className="navbar-links">
                 <Link href="/gallery">Галерея</Link>
                 <Link href="/rites">Чины</Link>
+                <Link href="/names">Именины</Link>
                 <Link href="/about">О проекте</Link>
                 <button
                     type="button"

@@ -1,0 +1,57 @@
+.names-page {
+  max-width: 46rem;
+
+  h1 {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+  }
+
+  p {
+    margin-bottom: 0.75rem;
+  }
+}
+
+.name-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+
+  input {
+    flex: 1 1 12rem;
+    min-width: 0;
+    padding: 0.35rem 0.6rem;
+    border: 1px solid #d8d0c8;
+    border-radius: 0.35rem;
+  }
+
+  button {
+    padding: 0.35rem 0.9rem;
+    border: 0;
+    border-radius: 0.35rem;
+    background: #ee6e73;
+    color: #fff;
+    cursor: pointer;
+  }
+}
+
+.name-results {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
+}
+
+.name-result-meta {
+  margin-left: 0.5rem;
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.name-note {
+  margin-top: 1rem;
+  font-size: 0.8rem;
+  color: #777;
+}

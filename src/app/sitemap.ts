@@ -19,6 +19,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
         { url: `${SITE_URL}/about`, changeFrequency: "yearly", priority: 0.3 },
         { url: `${SITE_URL}/gallery`, changeFrequency: "weekly", priority: 0.5 },
         { url: `${SITE_URL}/rites`, changeFrequency: "monthly", priority: 0.3 },
+        { url: `${SITE_URL}/names`, changeFrequency: "monthly", priority: 0.5 },
     ];
 
     const days: MetadataRoute.Sitemap = Array.from(
