@@ -1,63 +1,80 @@
-'use client';
-import {memo, useCallback, useEffect, useState} from "react";
+"use client";
+import { memo, useCallback, useEffect, useState } from "react";
 import "./styles.scss";
-import {slice} from "../../../lib/store/global";
-import {CALENDAR_TYPE} from "../../../types/index";
-import {useAppDispatch, useAppSelector} from "../../../lib/hooks";
-import {getCalendariesLocal} from "../../api";
+import { useRouter } from "next/navigation";
+import { ICalendar } from "../../../dto/calendar";
+import { IDayFilters } from "../../api";
+import { fetchCalendaries } from "../../api";
+import { buildListHref } from "../../../lib/routes";
 
-const SourceList = ({ items }) => {
-    const dispatch = useAppDispatch();
+const PER_PAGE = 100;
 
+interface SourceListProps {
+    items: ICalendar[];
+    total: number;
+    filters: IDayFilters;
+    defaultCalendaries: string[];
+}
+
+const SourceList = ({ items, total, filters, defaultCalendaries }: SourceListProps) => {
+    const router = useRouter();
+
+    const [extra, setExtra] = useState<ICalendar[]>([]);
     const [page, setPage] = useState(1);
 
-    const calendaries = useAppSelector(state => state.global.calendaries);
+    const all = [...items, ...extra];
+    const selected = new Set(filters.calendaries);
 
-    const [itemsMore, setItemsMore] = useState([]);
+    // Selection is a filter, so it belongs in the URL — that is what makes a
+    // filtered day shareable at all.
+    const onToggle = useCallback(
+        (calendary: ICalendar) => () => {
+            const slug = calendary.slug?.text;
+            if (!slug) return;
 
-    console.log(items.list);
+            const next = selected.has(slug)
+                ? filters.calendaries.filter((item) => item !== slug)
+                : [...filters.calendaries, slug];
 
-    const onPickSource = useCallback((el) => () => {
-        const has = calendaries.find(item => item.id === el.id);
-        dispatch(slice.actions.UpdateCalendaries(has ? calendaries.filter(item => item.id !== el.id) : [...calendaries, el]));
-    }, [calendaries]);
+            router.push(buildListHref({ ...filters, calendaries: next }, defaultCalendaries));
+        },
+        [router, filters, defaultCalendaries, selected],
+    );
 
-    const onScroll = useCallback((e) => {
-        if (e.currentTarget.scrollHeight === e.currentTarget.clientHeight + e.currentTarget.scrollTop) {
-            setPage(page + 1);
-        }
+    const onScroll = useCallback(
+        (e: React.UIEvent<HTMLDivElement>) => {
+            const el = e.currentTarget;
+            if (el.scrollHeight === el.clientHeight + el.scrollTop && all.length < total) {
+                setPage((current) => current + 1);
+            }
+        },
+        [all.length, total],
+    );
+
+    useEffect(() => {
+        if (page === 1) return;
+
+        let cancelled = false;
+        fetchCalendaries(page, PER_PAGE).then((res) => {
+            if (!cancelled) setExtra((current) => [...current, ...res.list]);
+        });
+
+        return () => {
+            cancelled = true;
+        };
     }, [page]);
-
-    useEffect(() => {
-        if (page > 1 && items.list.length + itemsMore.length < items.total) {
-            getCalendariesLocal(page, 100).then((res) => {
-                setItemsMore([...itemsMore, ...res.list]);
-            })
-        }
-    }, [page, items, itemsMore]);
-
-    useEffect(() => {
-        dispatch(slice.actions.UpdateCalendaries(items.list.filter(el => el.licit)));
-    }, [items.list]);
 
     return (
         <div className="source-list" onScroll={onScroll}>
-            {items.list.map(el => (
+            {all.map((calendary) => (
                 <div
-                    key={el.id}
-                    className={`source-item ${calendaries.find(item => item.id === el.id) && `source-item-is-active`}`}
-                    onClick={onPickSource(el)}
+                    key={calendary.id}
+                    className={`source-item ${
+                        selected.has(calendary.slug?.text) ? "source-item-is-active" : ""
+                    }`}
+                    onClick={onToggle(calendary)}
                 >
-                    {el.titles && el.titles[0]?.text}
-                </div>
-            ))}
-            {itemsMore.map(el => (
-                <div
-                    key={el.id}
-                    className={`source-item ${calendaries.find(item => item.id === el.id) && `source-item-is-active`}`}
-                    onClick={onPickSource(el)}
-                >
-                    {el.titles && el.titles[0]?.text}
+                    {calendary.titles?.[0]?.text ?? calendary.slug?.text}
                 </div>
             ))}
         </div>

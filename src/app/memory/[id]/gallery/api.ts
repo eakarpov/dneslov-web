@@ -6,5 +6,8 @@ export const getMemoryGallery = async (slug: string, from: number, to: number): 
         headers: {
             Range: `records=${from}-${to}`,
         },
-    }).catch(e => console.log(e));
+    }).catch((e) => {
+        console.error(e);
+        return undefined;
+    });
 };

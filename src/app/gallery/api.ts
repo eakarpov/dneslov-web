@@ -6,5 +6,8 @@ export const getGalleryIndex = async (from: number, to: number): Promise<IGaller
         headers: {
             Range: `records=${from}-${to}`,
         },
-    }).catch(e => console.log(e));
+    }).catch((e) => {
+        console.error(e);
+        return undefined;
+    });
 };

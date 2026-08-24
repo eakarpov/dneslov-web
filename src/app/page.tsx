@@ -1,20 +1,30 @@
-import {Suspense} from "react";
+import { Suspense } from "react";
+import type { Metadata } from "next";
 import Navbar from "./common/Navbar";
-import Calendar from "./components/Calendar/index";
-import SourceList from "./components/SourceList/index";
-import Content from "./Content";
-import {getCalendaries} from "./api";
+import DayView from "./day/DayView";
+import { churchToday } from "../lib/dates/civil";
 
+// "Today" moves, so this page is re-rendered often; the underlying backend
+// responses are cached separately for an hour.
+export const revalidate = 300;
+
+export const metadata: Metadata = {
+    title: "Днеслов — православный календарь",
+    description: "Памяти святых, праздников и чтимых икон на сегодняшний день.",
+    alternates: { canonical: "/" },
+};
+
+// The home page is deliberately parameter-free: it is the canonical "today"
+// address. Any filtering navigates to /day/<date> or /search.
 export default function Home() {
-  const calendariesData = getCalendaries(1, 100);
-  return (
-    <div>
-      <Navbar />
-      <main className="flex m-4 w-full">
-          <Suspense fallback={<div>Загрузка...</div>}>
-              <Content itemsPromise={calendariesData} />
-          </Suspense>
-      </main>
-    </div>
-  );
+    return (
+        <div>
+            <Navbar />
+            <main className="flex m-4">
+                <Suspense fallback={<div>Загрузка...</div>}>
+                    <DayView date={churchToday()} query="" calendaries={null} />
+                </Suspense>
+            </main>
+        </div>
+    );
 }

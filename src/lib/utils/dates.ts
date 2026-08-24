@@ -1,12 +1,16 @@
 import dayjs, {Dayjs} from "dayjs";
-import {IFastDaysMeta} from "../../dto/calendar";
+import {FAST_MEASURE, IFastDaysMeta} from "../../dto/calendar";
 import * as easterCalc  from 'date-easter';
-import {strict} from "assert";
-import {is} from "immutable";
+import {fromDate, julianToCivil} from "../dates/civil";
 
-const easterDate = (yearIn: number, isJul: boolean) => {
-    let year = yearIn || new Date().getFullYear();
-    return new Date(Date.parse(isJul && easterCalc.julianEaster(year) || easterCalc.orthodoxEaster(year)));
+// date-easter returns {year, month, day}, not a parseable string — the previous
+// Date.parse(...) of that object yielded an Invalid Date, which silently
+// disabled both the Pascha marker and every Pascha-relative fast rule.
+const easterDate = (yearIn: number, isJul: boolean): Date => {
+    const year = yearIn || new Date().getFullYear();
+    const easter = isJul ? easterCalc.julianEaster(year) : easterCalc.orthodoxEaster(year);
+
+    return new Date(easter.year, easter.month - 1, easter.day);
 }
 
 // "matchBound" function to the test weither the date passed as an argument
@@ -21,9 +25,23 @@ const easterDate = (yearIn: number, isJul: boolean) => {
 // easter      - easter for the date to match
 // year        - year of the date to match
 // baseDateRef - reference hash t store or read baseDate value from "date"
-const matchBound = (date, forward, backward, strictDay, strictMonth, weekDayIn, weekDay, easter, year, baseDateRef, isJul: boolean) => {
+interface BaseDateRef { date?: number }
+
+const matchBound = (
+    date: Date,
+    forward: string | undefined,
+    backward: string | undefined,
+    strictDay: string | undefined,
+    strictMonth: string | undefined,
+    weekDayIn: string | undefined,
+    weekDay: number,
+    easter: Date,
+    year: number,
+    baseDateRef: BaseDateRef,
+    isJul: boolean,
+) => {
     let cond = false;
-    let condDate;
+    let condDate = 0;
     const baseDate = baseDateRef.date;
     const starOfDate = dayjs(date).startOf("day").valueOf();
 
@@ -44,13 +62,10 @@ const matchBound = (date, forward, backward, strictDay, strictMonth, weekDayIn, 
 
         cond = condString();
     } else if (strictDay) {
-        condDate = new Date(date)
-        condDate.setDate(strictDay)
-        condDate.setMonth(+strictMonth - 1)
-        if (baseDate && condDate < baseDate) {
-            // condDate.setFullYear(condDate.getFullYear() + 1)
-        }
-        condDate = dayjs(condDate).startOf("day").valueOf();
+        const probe = new Date(date)
+        probe.setDate(+strictDay)
+        probe.setMonth(+strictMonth! - 1)
+        condDate = dayjs(probe).startOf("day").valueOf();
         // if (date.getDate() === 29) {
         //     console.log("222222", baseDateRef, condDate, baseDate);
         // }
@@ -77,10 +92,10 @@ const isDayFasten = (date: Date, fastDays: IFastDaysMeta[], isSundayFirst: boole
 
     if (!fastDays) return false;
 
-    return fastDays.reduce((measure, rule) => {
+    return fastDays.reduce<boolean | FAST_MEASURE>((measure, rule) => {
         let fast = [rule.days].flat().some((ranges) => {
             return [ranges].flat().some((range) => {
-                const baseDateRef = {};
+                const baseDateRef: BaseDateRef = {};
                 const match = range.match(/(?:(?:\+(\d+))|(?:\-(\d+))|(\d+)\.(\d+))(?:%(\d))?(?:\.\.(?:(?:\+(\d+))|(?:\-(\d+))|(\d+)\.(\d+))(?:%(\d))?)?/);
                 if (match === null) return undefined;
                 const begin = matchBound(date, match[1], match[2], match[3], match[4], match[5], weekDay, easter, year, baseDateRef, isJul)
@@ -111,9 +126,9 @@ const isDayFasten = (date: Date, fastDays: IFastDaysMeta[], isSundayFirst: boole
 };
 
 export const getFullWeeksStartAndEndInMonth = (
-    month, year, baseDate: Dayjs, dateToday: Dayjs, pickedDate: Dayjs|null, isSundayFirst: boolean, fastDays: IFastDaysMeta[], isJul: boolean,
+    month: number, year: number, baseDate: Dayjs, dateToday: Dayjs, pickedDate: Dayjs|null, isSundayFirst: boolean, fastDays: IFastDaysMeta[], isJul: boolean,
 ) => {
-    let weeks = [],
+    let weeks: {start: number, end: number}[] = [],
         lastDate = new Date(year, month + 1, 0),
         numDays = lastDate.getDate()
 
@@ -166,7 +181,11 @@ export const getFullWeeksStartAndEndInMonth = (
                 isActive: pickedDate && dayjs(date).isSame(pickedDate, "date"),
                 date: date.getDate(),
                 dateJs: dayjs(date),
-                dateNew: dayjs(date).add(13, "days").format("DD"),
+                // Civil counterpart of a Julian-style cell. Derived, not a fixed
+                // 13-day shift — the gap becomes 14 days in 2100.
+                dateNew: isJul
+                    ? String(julianToCivil(fromDate(date)).day).padStart(2, "0")
+                    : undefined,
                 monthValue: date.getMonth(),
                 month: date.toLocaleString('en', {month: 'long'}),
                 day: date.toLocaleString('en', {weekday: 'long'}),

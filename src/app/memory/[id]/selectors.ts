@@ -9,7 +9,7 @@ export const getExternalLinks = (memory: IMemory): IMemoryLink[] =>
 const firstOrderFrom = (memoes: IMemo[] = []): string | undefined =>
     memoes.reduce<string | undefined>((order, memo) => {
         if (order) return order;
-        return memo.orders && Object.values(memo.orders).find(Boolean);
+        return (memo.orders && Object.values(memo.orders).find(Boolean)) || undefined;
     }, undefined);
 
 // Mirrors app/components/Memory.jsx#getOrder: first order found either on this
