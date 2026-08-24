@@ -1,6 +1,15 @@
 .calendar-wrapper {
     width: 300px;
+    max-width: 100%;
     padding: 10px;
+}
+
+// Anything reachable by keyboard has to show where the focus is.
+.calendar-wrapper :focus-visible,
+.source-item:focus-visible,
+.chip-remove:focus-visible {
+    outline: 2px solid #3a6ea5;
+    outline-offset: 1px;
 }
 
 .calendar-header {
@@ -10,12 +19,16 @@
     background: #ee6e73;
     height: 29px;
 
-    & > div {
+    & > button {
         flex: 1;
         display: flex;
         align-items: center;
         justify-content: center;
-        cursor: pointer;;
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
     }
 }
 
@@ -94,7 +107,8 @@
     flex-direction: row;
 
     & > div {
-        width: 40px;
+        flex: 1 1 0;
+        min-width: 0;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -123,7 +137,14 @@
 }
 
 .calendar-day {
-    width: 40px;
+    // Cells share the row evenly instead of being pinned to 40px, so the grid
+    // fits a phone without overflowing.
+    flex: 1 1 0;
+    min-width: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
     cursor: pointer;
     display: flex;
     flex-direction: column;
@@ -170,12 +191,17 @@
     align-items: center;
     justify-content: space-between;
 
-    & > div {
+    & > button {
         cursor: pointer;
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: center;
+        border: 0;
+        background: none;
+        color: inherit;
+        font: inherit;
+        padding: 0 6px;
     }
 }
 

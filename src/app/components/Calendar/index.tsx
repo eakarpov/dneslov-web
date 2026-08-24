@@ -132,23 +132,32 @@ const Calendar = ({ filters, defaultCalendaries, calendaries }: CalendarProps) =
     return (
         <div className="calendar-wrapper">
             <div className="calendar-header">
-                <div
+                <button
+                    type="button"
+                    aria-pressed={isJul}
                     onClick={() => onPickStyle(CALENDAR_TYPE.JULIAN)}
                     className={isJul ? "calendar-active" : ""}
                 >
                     Юлианский
-                </div>
-                <div
+                </button>
+                <button
+                    type="button"
+                    aria-pressed={!isJul}
                     onClick={() => onPickStyle(CALENDAR_TYPE.NEW_JULIAN)}
                     className={!isJul ? "calendar-active" : ""}
                 >
                     Новоюлианский
-                </div>
+                </button>
             </div>
             <div className="calendar-date-header">
-                <div className="calendar-chevron" onClick={() => shiftMonth(-1)}>
+                <button
+                    type="button"
+                    className="calendar-chevron"
+                    aria-label="Предыдущий месяц"
+                    onClick={() => shiftMonth(-1)}
+                >
                     <ChevronLeftIcon />
-                </div>
+                </button>
                 <button
                     type="button"
                     className="calendar-month"
@@ -157,9 +166,14 @@ const Calendar = ({ filters, defaultCalendaries, calendaries }: CalendarProps) =
                 >
                     {monthLabel}, {frameAnchor.year}
                 </button>
-                <div className="calendar-chevron" onClick={() => shiftMonth(1)}>
+                <button
+                    type="button"
+                    className="calendar-chevron"
+                    aria-label="Следующий месяц"
+                    onClick={() => shiftMonth(1)}
+                >
                     <ChevronRightIcon />
-                </div>
+                </button>
             </div>
             {pickerOpen && (
                 <div className="calendar-picker">
@@ -199,9 +213,12 @@ const Calendar = ({ filters, defaultCalendaries, calendaries }: CalendarProps) =
             {weekArray.map((week) => (
                 <div className="calendar-week" key={week[0].dateJs.valueOf()}>
                     {week.map((day) => (
-                        <div
+                        <button
+                            type="button"
                             key={day.dateJs.valueOf()}
                             title={fastTitle(day.isFast)}
+                            aria-current={day.isActive ? "date" : undefined}
+                            aria-label={`${day.date} ${monthLabel} ${frameAnchor.year}`}
                             onClick={() => goToDate(fromFrame(fromDate(day.dateJs.toDate())))}
                             className={
                                 `calendar-day ${
@@ -214,23 +231,23 @@ const Calendar = ({ filters, defaultCalendaries, calendaries }: CalendarProps) =
                         >
                             <span>{day.date}</span>
                             {isJul && <span className="secondary">{day.dateNew}</span>}
-                        </div>
+                        </button>
                     ))}
                 </div>
             ))}
             <div className="calendar-yesterday-tomorrow">
-                <div onClick={() => goToDate(addDays(selected, -1))}>
-                    <div className="calendar-chevron">
+                <button type="button" onClick={() => goToDate(addDays(selected, -1))}>
+                    <span className="calendar-chevron">
                         <ChevronLeftIcon />
-                    </div>
+                    </span>
                     Вчера
-                </div>
-                <div onClick={() => goToDate(addDays(selected, 1))}>
+                </button>
+                <button type="button" onClick={() => goToDate(addDays(selected, 1))}>
                     Завтра
-                    <div className="calendar-chevron">
+                    <span className="calendar-chevron">
                         <ChevronRightIcon />
-                    </div>
-                </div>
+                    </span>
+                </button>
             </div>
             <div className="calendar-settings">
                 <div className="calendar-settings-name">

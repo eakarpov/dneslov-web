@@ -47,7 +47,7 @@ export default function RootLayout({
           {/* Chrome lives here so every page — including error.tsx and
               not-found.tsx — keeps its navigation. */}
           <Navbar />
-          <main className="flex m-4">{children}</main>
+          <main className="page-shell">{children}</main>
         </StoreProvider>
       </body>
     </html>

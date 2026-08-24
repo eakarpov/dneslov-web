@@ -16,7 +16,11 @@ import Markdown from "../../lib/markdown";
 import "../home.scss";
 
 const ROW_HEIGHT = 58;
+// Starting height for the server render; replaced by a viewport-derived one
+// after mount so the list fills a phone screen instead of overflowing it.
 const LIST_HEIGHT = 600;
+const LIST_MIN_HEIGHT = 320;
+const CHROME_HEIGHT = 260;
 // Long enough not to fire a request per keystroke, short enough that the list
 // follows typing. The monolith waits 1.5s, which reads as the site being stuck.
 const SEARCH_DEBOUNCE_MS = 700;
@@ -115,7 +119,19 @@ const DayList = ({
     const [mounted, setMounted] = useState(false);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+    const [listHeight, setListHeight] = useState(LIST_HEIGHT);
+
     useEffect(() => setMounted(true), []);
+
+    useEffect(() => {
+        const update = () =>
+            setListHeight(Math.max(LIST_MIN_HEIGHT, window.innerHeight - CHROME_HEIGHT));
+
+        update();
+        window.addEventListener("resize", update);
+
+        return () => window.removeEventListener("resize", update);
+    }, []);
 
     // Remember a selection the reader actually made, so memory pages can offer
     // their content in the same context. The default is not worth storing.
@@ -302,7 +318,7 @@ const DayList = ({
                             {({ width }) => (
                                 <List
                                     ref={registerChild}
-                                    height={LIST_HEIGHT}
+                                    height={listHeight}
                                     onRowsRendered={onRowsRendered}
                                     rowCount={items.total}
                                     rowHeight={ROW_HEIGHT}
