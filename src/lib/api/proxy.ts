@@ -1,8 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import axios, { AxiosRequestConfig } from "axios";
-import { buildLegacyApiUrl } from "./host";
-
-const TIMEOUT_MS = 10000;
+import { fetchLegacyAnswer } from "./host";
 
 // Only named params are forwarded: the browser must not be able to steer this
 // proxy at the legacy backend with arbitrary query strings.
@@ -36,19 +33,20 @@ export const proxyLegacyJson = async (
     { path, params, forwardRange = false, fallback, transform }: ProxyOptions,
 ) => {
     const search = params?.toString();
-    const url = buildLegacyApiUrl(search ? `${path}?${search}` : path);
+    const url = search ? `${path}?${search}` : path;
 
-    const config: AxiosRequestConfig = { timeout: TIMEOUT_MS };
-    if (forwardRange && req.headers.range) {
-        config.headers = { Range: req.headers.range };
-    }
+    const init: RequestInit =
+        forwardRange && req.headers.range ? { headers: { Range: req.headers.range } } : {};
 
     try {
-        const response = await axios.get(url, config);
-        res.status(200).json(transform ? transform(response.data) : response.data);
+        // Goes through the same layer as the server-rendered pass, so the
+        // browser gets the last known good copy on an outage too.
+        const { data, stale } = await fetchLegacyAnswer(url, init);
+
+        if (stale) res.setHeader("X-Dneslov-Stale", "true");
+        res.status(200).json(transform ? transform(data) : data);
     } catch {
-        // The legacy backend is intermittently unreachable; answer with an empty
-        // shape so the caller renders "nothing found" instead of crashing.
+        // Nothing live and nothing saved.
         res.status(502).json(fallback);
     }
 };

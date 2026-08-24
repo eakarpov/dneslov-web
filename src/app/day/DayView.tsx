@@ -38,7 +38,7 @@ const DayView = async ({ date, query, calendaries: requested }: DayViewProps) =>
         query,
     };
 
-    const items = await getDayMemories(filters);
+    const { data: items, stale } = await getDayMemories(filters);
 
     const calendaryTitles = Object.fromEntries(
         calendaries.list
@@ -69,6 +69,7 @@ const DayView = async ({ date, query, calendaries: requested }: DayViewProps) =>
                 <DayList
                     items={items ?? { list: [], page: 1, total: 0 }}
                     unavailable={items === null}
+                    stale={stale}
                     filters={filters}
                     defaultCalendaries={defaultCalendaries}
                     calendaryTitles={calendaryTitles}

@@ -26,6 +26,8 @@ interface DayListProps {
     items: IDayMemoList;
     // The backend did not answer at all, as opposed to answering "nothing".
     unavailable?: boolean;
+    // Shown from the last known good copy while the reference is unreachable.
+    stale?: boolean;
     filters: IDayFilters;
     defaultCalendaries: string[];
     calendaryTitles: Record<string, string>;
@@ -100,6 +102,7 @@ const DayRow = ({ item }: { item: IDayMemo }) => {
 const DayList = ({
     items,
     unavailable,
+    stale,
     filters,
     defaultCalendaries,
     calendaryTitles,
@@ -268,6 +271,11 @@ const DayList = ({
                 ))}
             </div>
 
+            {stale && (
+                <div className="home-stale">
+                    Справочник не отвечает — показана сохранённая выдача, она могла устареть.
+                </div>
+            )}
             {unavailable && (
                 <div className="home-empty">
                     Справочник сейчас не отвечает. Попробуйте обновить страницу.
