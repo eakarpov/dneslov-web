@@ -1,5 +1,4 @@
 'use client';
-import { AutoSizer, List, InfiniteLoader } from "react-virtualized";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import Link from "next/link";
@@ -7,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { fetchDayMemories, IDayFilters } from "../../lib/api/day";
 import { IDayMemo, IDayMemoList } from "../../dto/day";
 import { buildListHref, dayCalendarHref, eventHref, memoryHref } from "../../lib/routes";
-import { formatHuman } from "../../lib/dates/civil";
+import { civilToJulian, formatHuman } from "../../lib/dates/civil";
 import { normalizeQuery, parseQueryGroups, removeQueryGroup } from "../../lib/search";
 import { slugChipColors } from "../../lib/colors";
 import { sameSlugs, writePreferences } from "../../lib/preferences";
@@ -15,12 +14,8 @@ import Chip from "../components/Chip";
 import Markdown from "../../lib/markdown";
 import "../home.scss";
 
-const ROW_HEIGHT = 58;
-// Starting height for the server render; replaced by a viewport-derived one
-// after mount so the list fills a phone screen instead of overflowing it.
-const LIST_HEIGHT = 600;
-const LIST_MIN_HEIGHT = 320;
-const CHROME_HEIGHT = 260;
+// The backend hands out 25 rows at a time.
+const PAGE_SIZE = 25;
 // Long enough not to fire a request per keystroke, short enough that the list
 // follows typing. The monolith waits 1.5s, which reads as the site being stuck.
 const SEARCH_DEBOUNCE_MS = 700;
@@ -36,9 +31,6 @@ interface DayListProps {
     defaultCalendaries: string[];
     calendaryTitles: Record<string, string>;
 }
-
-const indexRows = (list: IDayMemo[], offset = 0): Record<number, IDayMemo> =>
-    Object.fromEntries(list.map((item, index) => [offset + index, item]));
 
 const DayRow = ({ item }: { item: IDayMemo }) => {
     const [roundelFailed, setRoundelFailed] = useState(false);
@@ -114,24 +106,16 @@ const DayList = ({
     const router = useRouter();
 
     const [searchValue, setSearchValue] = useState(filters.query);
-    const [rows, setRows] = useState<Record<number, IDayMemo>>(() => indexRows(items.list));
-    // react-virtualized measures the DOM, so it can only run after mount.
-    const [mounted, setMounted] = useState(false);
+    // Rendered straight from the server's rows: the list used to be virtualised,
+    // which meant the server HTML carried no memories at all — nothing for a
+    // crawler to index and nothing to print.
+    const [rows, setRows] = useState<IDayMemo[]>(items.list);
+    // Where the next page starts. Counted in requested records, not in rendered
+    // rows: the backend de-duplicates after slicing, so a window of 25 can come
+    // back with 24 — and stepping by the row count would skip a record.
+    const [offset, setOffset] = useState(PAGE_SIZE);
+    const [loadingMore, setLoadingMore] = useState(false);
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-    const [listHeight, setListHeight] = useState(LIST_HEIGHT);
-
-    useEffect(() => setMounted(true), []);
-
-    useEffect(() => {
-        const update = () =>
-            setListHeight(Math.max(LIST_MIN_HEIGHT, window.innerHeight - CHROME_HEIGHT));
-
-        update();
-        window.addEventListener("resize", update);
-
-        return () => window.removeEventListener("resize", update);
-    }, []);
 
     // Remember a selection the reader actually made, so memory pages can offer
     // their content in the same context. The default is not worth storing.
@@ -154,7 +138,8 @@ const DayList = ({
     // A new server render (i.e. a new URL) replaces the list wholesale — the
     // rows we had belong to the previous filters.
     useEffect(() => {
-        setRows(indexRows(items.list));
+        setRows(items.list);
+        setOffset(PAGE_SIZE);
         setSearchValue(filters.query);
     }, [items, filters.query]);
 
@@ -195,36 +180,32 @@ const DayList = ({
         [navigate, searchValue],
     );
 
-    const isRowLoaded = useCallback(({ index }: { index: number }) => Boolean(rows[index]), [rows]);
+    const loadMore = useCallback(async () => {
+        setLoadingMore(true);
 
-    const loadMoreRows = useCallback(
-        async ({ startIndex, stopIndex }: { startIndex: number; stopIndex: number }) => {
-            // Paging carries the *active* filters. It used to send only `c`, so
-            // scrolling mixed in rows the current date/query excluded.
-            const batch = await fetchDayMemories(filters, startIndex, stopIndex);
-            setRows((prev) => ({ ...prev, ...indexRows(batch.list ?? [], startIndex) }));
-        },
-        [filters],
-    );
+        // Paging carries the *active* filters. It used to send only `c`, so
+        // scrolling mixed in rows the current date/query excluded.
+        const batch = await fetchDayMemories(filters, offset, offset + PAGE_SIZE - 1);
 
-    const rowRenderer = useCallback(
-        ({ index, key, style }: { index: number; key: string; style: React.CSSProperties }) => {
-            const item = rows[index];
-
-            return (
-                <div className="home-row" key={key} style={style}>
-                    {item ? <DayRow item={item} /> : <div className="home-row-loading">Загрузка...</div>}
-                </div>
-            );
-        },
-        [rows],
-    );
+        setRows((prev) => [...prev, ...(batch.list ?? [])]);
+        setOffset((current) => current + PAGE_SIZE);
+        setLoadingMore(false);
+    }, [filters, offset]);
 
     const queryGroups = parseQueryGroups(filters.query);
     const icsHref = dayCalendarHref(filters, defaultCalendaries);
 
     return (
         <div className="flex flex-col w-full">
+            {/* Only ever seen on paper: the day and the site it came from. */}
+            <div className="print-header">
+                <strong>
+                    {filters.date ? formatHuman(filters.date) : "Поиск по справочнику"}
+                </strong>
+                {filters.date && ` (${formatHuman(civilToJulian(filters.date))} ст. ст.)`}
+                {" — Днеслов"}
+            </div>
+
             <div className="search-container">
                 <div className="search-icon">
                     <MagnifyingGlassIcon />
@@ -307,29 +288,27 @@ const DayList = ({
                 <div className="home-empty">Ничего не найдено</div>
             )}
 
-            {mounted && items.total > 0 && (
-                <InfiniteLoader
-                    isRowLoaded={isRowLoaded}
-                    loadMoreRows={loadMoreRows}
-                    rowCount={items.total}
-                >
-                    {({ onRowsRendered, registerChild }) => (
-                        <AutoSizer disableHeight className="home-list">
-                            {({ width }) => (
-                                <List
-                                    ref={registerChild}
-                                    height={listHeight}
-                                    onRowsRendered={onRowsRendered}
-                                    rowCount={items.total}
-                                    rowHeight={ROW_HEIGHT}
-                                    rowRenderer={rowRenderer}
-                                    width={width}
-                                />
-                            )}
-                        </AutoSizer>
-                    )}
-                </InfiniteLoader>
+            {rows.length > 0 && (
+                <ul className="home-list">
+                    {rows.map((item, index) => (
+                        <li className="home-row" key={`${item.slug ?? "row"}-${item.id ?? index}`}>
+                            <DayRow item={item} />
+                        </li>
+                    ))}
+                </ul>
             )}
+
+            {offset < items.total && (
+                <button
+                    type="button"
+                    className="home-more"
+                    onClick={loadMore}
+                    disabled={loadingMore}
+                >
+                    {loadingMore ? "Загрузка..." : `Показать ещё (${items.total - offset})`}
+                </button>
+            )}
+
         </div>
     );
 };

@@ -81,6 +81,9 @@
 
 .home-list {
   width: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
 }
 
 .home-empty {
@@ -92,9 +95,26 @@
   display: flex;
   align-items: center;
   width: 100%;
+  min-height: 58px;
   gap: 0.6rem;
   padding-right: 0.5rem;
   box-sizing: border-box;
+}
+
+.home-more {
+  align-self: flex-start;
+  margin-top: 0.75rem;
+  padding: 0.35rem 0.9rem;
+  border: 0;
+  border-radius: 0.35rem;
+  background: #ee6e73;
+  color: #fff;
+  cursor: pointer;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
 }
 
 .home-row-loading {
@@ -207,5 +227,44 @@
 
   .search-icon {
     margin-right: 12px;
+  }
+}
+
+// Printing a day. Everything that exists to navigate is dropped; what remains
+// is the day itself and its memories.
+@media print {
+  .search-container,
+  .selection-container,
+  .home-more,
+  .home-stale,
+  .day-ics {
+    display: none !important;
+  }
+
+  .home-row {
+    min-height: 0;
+    padding: 0.15rem 0;
+    break-inside: avoid;
+  }
+
+  .home-row-icon {
+    display: none;
+  }
+
+  .home-row-title {
+    white-space: normal;
+    overflow: visible;
+  }
+
+  .home-row-note {
+    white-space: normal;
+    overflow: visible;
+    color: #444;
+  }
+
+  .chip {
+    border: 1px solid #999;
+    background: none !important;
+    color: #000 !important;
   }
 }

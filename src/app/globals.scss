@@ -129,3 +129,34 @@
   height: 1rem;
   color: white;
 }
+
+@media print {
+  .navbar,
+  .calendar-wrapper,
+  .source-list,
+  .tour,
+  .lightbox {
+    display: none !important;
+  }
+
+  .page-shell {
+    display: block;
+    margin: 0;
+  }
+
+  a {
+    color: #000;
+    text-decoration: none;
+  }
+
+  // A printed sheet should say which day it is even though the calendar and the
+  // selection chips are gone.
+  .print-header {
+    display: block !important;
+    margin-bottom: 0.5rem;
+  }
+}
+
+.print-header {
+  display: none;
+}
