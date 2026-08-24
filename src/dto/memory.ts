@@ -41,12 +41,15 @@ export interface IMemory {
     quantity?: string | number | null;
     base_year?: number;
     description?: string;
-    names: IMemoryName[];
-    links: IMemoryLink[];
-    events: IEvent[];
-    memoes: IMemo[];
-    scripta: IScriptum[];
-    coverings: ICovering[];
+    // Every one of these can be missing from a real response, not merely
+    // empty: a memory with no external links has no `links` key at all, and
+    // declaring them required crashed the page for such memories.
+    names?: IMemoryName[];
+    links?: IMemoryLink[];
+    events?: IEvent[];
+    memoes?: IMemo[];
+    scripta?: IScriptum[];
+    coverings?: ICovering[];
     image_url?: string;
-    bond_memories: IBondMemory[];
+    bond_memories?: IBondMemory[];
 }

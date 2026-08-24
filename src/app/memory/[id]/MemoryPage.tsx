@@ -4,6 +4,7 @@ import Link from "next/link";
 import Chip from "../../components/Chip";
 import Markdown from "../../../lib/markdown";
 import {readPreferences} from "../../../lib/preferences";
+import {memoryTypeLabel} from "../../../lib/memoryTypes";
 import AudioPlayer from "../../components/AudioPlayer";
 import {IMemory} from "../../../dto/memory";
 import {getDescribedMemoes, getExternalLinks, getHappenedAt, getOrder} from "./selectors";
@@ -91,11 +92,12 @@ const MemoryPage = ({ item: canonical }: MemoryPageProps) => {
             )}
             <div className="memory-header">
                 <Chip text={order} className="order" />
+                <Chip text={memoryTypeLabel(item.type)} className="kind" />
                 <div className="memory-title">
                     <span>{item.short_name}</span>
-                    {item.names?.length > 0 && (
+                    {(item.names?.length ?? 0) > 0 && (
                         <div className="memory-names">
-                            {item.names.map((name, index) => (
+                            {item.names?.map((name, index) => (
                                 // real API responses contain names sharing the same id (different alphabet/language variants)
                                 <span key={`${name.id}-${index}`}>{name.name_text}</span>
                             ))}
@@ -129,11 +131,11 @@ const MemoryPage = ({ item: canonical }: MemoryPageProps) => {
                 </div>
             )}
 
-            {item.coverings?.length > 0 && (
+            {(item.coverings?.length ?? 0) > 0 && (
                 <div className="memory-section">
                     <div className="memory-section-title">Покровительствует</div>
                     <div className="flex flex-wrap">
-                        {item.coverings.map((covering) => (
+                        {item.coverings?.map((covering) => (
                             <Chip key={covering.id} text={covering.name} className="place" />
                         ))}
                     </div>
@@ -172,11 +174,11 @@ const MemoryPage = ({ item: canonical }: MemoryPageProps) => {
                 </div>
             )}
 
-            {item.bond_memories?.length > 0 && (
+            {(item.bond_memories?.length ?? 0) > 0 && (
                 <div className="memory-section">
                     <div className="memory-section-title">Опорная память</div>
                     <div className="flex flex-wrap">
-                        {item.bond_memories.map((bond) => (
+                        {item.bond_memories?.map((bond) => (
                             <Chip
                                 key={bond.slug}
                                 text={[bond.order, bond.name].filter(Boolean).join(" ")}
@@ -188,11 +190,11 @@ const MemoryPage = ({ item: canonical }: MemoryPageProps) => {
                 </div>
             )}
 
-            {item.events?.length > 0 && (
+            {(item.events?.length ?? 0) > 0 && (
                 <div className="memory-section">
                     <div className="memory-section-title">События</div>
                     <ul className="memory-events">
-                        {item.events.map((event) => (
+                        {item.events?.map((event) => (
                             <li key={event.id}>
                                 <Link href={`/memory/${item.slug}/${event.id}`}>
                                     {getEventTitle(event)}
