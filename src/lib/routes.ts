@@ -4,10 +4,10 @@ import { DateParts, formatCivilISO } from "./dates/civil";
 // Every filter that changes *which* memories are listed lives in the URL, so a
 // view is always shareable. Filters equal to the page default are left out to
 // keep one canonical address per view.
-export const buildListHref = (
+const listParams = (
     filters: IDayFilters,
     defaultCalendaries: readonly string[],
-): string => {
+): URLSearchParams => {
     const params = new URLSearchParams();
 
     const selected = [...filters.calendaries].sort().join(",");
@@ -19,8 +19,28 @@ export const buildListHref = (
         params.set("q", filters.query);
     }
 
-    const search = params.toString();
+    return params;
+};
+
+export const buildListHref = (
+    filters: IDayFilters,
+    defaultCalendaries: readonly string[],
+): string => {
+    const search = listParams(filters, defaultCalendaries).toString();
     const path = filters.date ? `/day/${formatCivilISO(filters.date)}` : "/search";
+
+    return search ? `${path}?${search}` : path;
+};
+
+// The same day, as a calendar file, under the same filters.
+export const dayCalendarHref = (
+    filters: IDayFilters,
+    defaultCalendaries: readonly string[],
+): string | null => {
+    if (!filters.date) return null;
+
+    const search = listParams(filters, defaultCalendaries).toString();
+    const path = `/day/${formatCivilISO(filters.date)}/calendar.ics`;
 
     return search ? `${path}?${search}` : path;
 };

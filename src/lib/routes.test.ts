@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildListHref, dayHref, eventHref, memoryHref } from "./routes";
+import { buildListHref, dayCalendarHref, dayHref, eventHref, memoryHref } from "./routes";
 import { IDayFilters } from "./api/day";
 
 const DEFAULTS = ["рпц", "днес", "стих"];
@@ -44,6 +44,19 @@ describe("buildListHref", () => {
         expect(buildListHref(filters({ date: null, query: "икона" }), DEFAULTS)).toBe(
             "/search?q=%D0%B8%D0%BA%D0%BE%D0%BD%D0%B0",
         );
+    });
+});
+
+describe("dayCalendarHref", () => {
+    it("offers the same day under the same filters", () => {
+        expect(dayCalendarHref(filters(), DEFAULTS)).toBe("/day/2026-08-24/calendar.ics");
+        expect(dayCalendarHref(filters({ calendaries: ["рпц"] }), DEFAULTS)).toBe(
+            "/day/2026-08-24/calendar.ics?c=%D1%80%D0%BF%D1%86",
+        );
+    });
+
+    it("has nothing to offer without a day", () => {
+        expect(dayCalendarHref(filters({ date: null }), DEFAULTS)).toBeNull();
     });
 });
 

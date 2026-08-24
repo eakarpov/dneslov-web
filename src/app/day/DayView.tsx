@@ -4,6 +4,7 @@ import Calendar from "../components/Calendar/index";
 import SourceList from "../components/SourceList/index";
 import DayList from "./DayList";
 import Tour from "../components/Tour";
+import FastLine from "../components/FastLine";
 
 // Mirrors the backend's own default (CoreFeatures#default_calendary_slugs).
 // Used when the calendary list itself could not be fetched: sending no `c` at
@@ -58,6 +59,16 @@ const DayView = async ({ date, query, calendaries: requested }: DayViewProps) =>
                     defaultCalendaries={defaultCalendaries}
                     calendaries={calendaries.list}
                 />
+                {date && (
+                    <FastLine
+                        date={date}
+                        fastDays={
+                            calendaries.list.find((calendary) =>
+                                filters.calendaries.includes(calendary.slug?.text),
+                            )?.meta?.fast_days
+                        }
+                    />
+                )}
                 <SourceList
                     items={calendaries.list}
                     total={calendaries.total}

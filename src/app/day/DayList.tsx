@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { fetchDayMemories, IDayFilters } from "../../lib/api/day";
 import { IDayMemo, IDayMemoList } from "../../dto/day";
-import { buildListHref, eventHref, memoryHref } from "../../lib/routes";
+import { buildListHref, dayCalendarHref, eventHref, memoryHref } from "../../lib/routes";
 import { formatHuman } from "../../lib/dates/civil";
 import { normalizeQuery, parseQueryGroups, removeQueryGroup } from "../../lib/search";
 import { slugChipColors } from "../../lib/colors";
@@ -205,6 +205,7 @@ const DayList = ({
     );
 
     const queryGroups = parseQueryGroups(filters.query);
+    const icsHref = dayCalendarHref(filters, defaultCalendaries);
 
     return (
         <div className="flex flex-col w-full">
@@ -269,6 +270,11 @@ const DayList = ({
                         removeLabel="Убрать слово"
                     />
                 ))}
+                {icsHref && (
+                    <a className="day-ics" href={icsHref} download>
+                        Скачать день (.ics)
+                    </a>
+                )}
             </div>
 
             {stale && (

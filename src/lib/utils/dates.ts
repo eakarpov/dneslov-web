@@ -86,13 +86,21 @@ const matchBound = (
     return cond
 }
 
-const isDayFasten = (date: Date, fastDays: IFastDaysMeta[], isSundayFirst: boolean, isJul: boolean, weekDay: number) => {
+// Which fast rule, if any, covers this day. Returning the rule itself (rather
+// than just its measure) is what lets the day page name the fast, not only
+// colour a cell.
+export const matchFastRule = (
+    date: Date,
+    fastDays: IFastDaysMeta[],
+    isJul: boolean,
+    weekDay: number,
+): IFastDaysMeta | null => {
     const year = date.getFullYear();
     const easter = easterDate(year, isJul);
 
-    if (!fastDays) return false;
+    if (!fastDays) return null;
 
-    return fastDays.reduce<boolean | FAST_MEASURE>((measure, rule) => {
+    return fastDays.reduce<IFastDaysMeta | null>((found, rule) => {
         let fast = [rule.days].flat().some((ranges) => {
             return [ranges].flat().some((range) => {
                 const baseDateRef: BaseDateRef = {};
@@ -119,10 +127,23 @@ const isDayFasten = (date: Date, fastDays: IFastDaysMeta[], isSundayFirst: boole
             })
         })
 
-        const flattenArr = [rule.measure].flat();
+        return found || (fast ? rule : null);
+    }, null);
+};
 
-        return measure || fast && flattenArr[flattenArr.length - 1];
-    }, false);
+const isDayFasten = (
+    date: Date,
+    fastDays: IFastDaysMeta[],
+    isSundayFirst: boolean,
+    isJul: boolean,
+    weekDay: number,
+): boolean | FAST_MEASURE => {
+    const rule = matchFastRule(date, fastDays, isJul, weekDay);
+    if (!rule) return false;
+
+    const measures = [rule.measure].flat();
+
+    return measures[measures.length - 1];
 };
 
 export const getFullWeeksStartAndEndInMonth = (
