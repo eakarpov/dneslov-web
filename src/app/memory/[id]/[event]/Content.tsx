@@ -1,18 +1,17 @@
 import {memo} from "react";
 import EventPage from "./EventPage";
 import {IEvent} from "../../../../dto/event";
-import {LegacyResult} from "../../../../lib/api/load";
 
 interface ContentProps {
-    eventPromise: Promise<LegacyResult<IEvent>>;
+    eventPromise: Promise<IEvent | null>;
     memorySlug: string;
 }
 
 const Content = async ({ eventPromise, memorySlug }: ContentProps) => {
-    const { data, unavailable } = await eventPromise;
+    const event = await eventPromise;
 
     return (
-        <EventPage event={data ?? undefined} memorySlug={memorySlug} unavailable={unavailable} />
+        <EventPage event={event ?? undefined} memorySlug={memorySlug} />
     );
 };
 

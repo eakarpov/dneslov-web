@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Navbar from "./common/Navbar";
 import DayView from "./day/DayView";
 import { churchToday } from "../lib/dates/civil";
 
@@ -18,13 +17,8 @@ export const metadata: Metadata = {
 // address. Any filtering navigates to /day/<date> or /search.
 export default function Home() {
     return (
-        <div>
-            <Navbar />
-            <main className="flex m-4">
-                <Suspense fallback={<div>Загрузка...</div>}>
-                    <DayView date={churchToday()} query="" calendaries={null} />
-                </Suspense>
-            </main>
-        </div>
+        <Suspense fallback={<div>Загрузка...</div>}>
+            <DayView date={churchToday()} query="" calendaries={null} />
+        </Suspense>
     );
 }

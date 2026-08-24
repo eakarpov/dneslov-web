@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Navbar from "../common/Navbar";
 import DayView from "../day/DayView";
 
 interface PageProps {
@@ -25,17 +24,12 @@ export default function SearchPage({ searchParams }: PageProps) {
         : null;
 
     return (
-        <div>
-            <Navbar />
-            <main className="flex m-4">
-                <Suspense fallback={<div>Загрузка...</div>}>
-                    <DayView
-                        date={null}
-                        query={searchParams.q ?? ""}
-                        calendaries={calendaries && calendaries.length > 0 ? calendaries : null}
-                    />
-                </Suspense>
-            </main>
-        </div>
+        <Suspense fallback={<div>Загрузка...</div>}>
+            <DayView
+                date={null}
+                query={searchParams.q ?? ""}
+                calendaries={calendaries && calendaries.length > 0 ? calendaries : null}
+            />
+        </Suspense>
     );
 }

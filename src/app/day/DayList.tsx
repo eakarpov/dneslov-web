@@ -10,7 +10,9 @@ import { buildListHref, eventHref, memoryHref } from "../../lib/routes";
 import { formatHuman } from "../../lib/dates/civil";
 import { normalizeQuery, parseQueryGroups, removeQueryGroup } from "../../lib/search";
 import { slugChipColors } from "../../lib/colors";
+import { sameSlugs, writePreferences } from "../../lib/preferences";
 import Chip from "../components/Chip";
+import Markdown from "../../lib/markdown";
 import "../home.scss";
 
 const ROW_HEIGHT = 58;
@@ -87,7 +89,7 @@ const DayRow = ({ item }: { item: IDayMemo }) => {
                 </div>
                 {item.note && (
                     <div className="home-row-note" title={item.note}>
-                        {item.note}
+                        <Markdown source={item.note} inline />
                     </div>
                 )}
             </div>
@@ -111,6 +113,17 @@ const DayList = ({
     const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     useEffect(() => setMounted(true), []);
+
+    // Remember a selection the reader actually made, so memory pages can offer
+    // their content in the same context. The default is not worth storing.
+    useEffect(() => {
+        if (sameSlugs(filters.calendaries, defaultCalendaries)) {
+            writePreferences({ calendaries: undefined });
+            return;
+        }
+
+        writePreferences({ calendaries: filters.calendaries });
+    }, [filters.calendaries, defaultCalendaries]);
 
     useEffect(
         () => () => {

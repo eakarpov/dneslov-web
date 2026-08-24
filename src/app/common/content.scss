@@ -62,7 +62,9 @@
 }
 
 .scriptum-text {
-  white-space: pre-line;
+  // Line breaks come through as <br> from the Markdown renderer now, so the
+  // text must not also honour raw newlines or every break would double.
+  white-space: normal;
 }
 
 .memory-events,
@@ -82,4 +84,40 @@
 
 .content-back {
   color: #ee6e73;
+}
+
+.memory-context-note {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.4rem;
+  background: #f6f2ee;
+  font-size: 0.8rem;
+  color: #6b5c4e;
+
+  button {
+    border: 0;
+    background: none;
+    padding: 0;
+    color: #3a6ea5;
+    text-decoration: underline;
+    cursor: pointer;
+    font: inherit;
+  }
+}
+
+.markdown p,
+.memory-description p,
+.content-description p,
+.scriptum-text p {
+  margin: 0 0 0.5rem;
+}
+
+.memory-description p:last-child,
+.content-description p:last-child,
+.scriptum-text p:last-child {
+  margin-bottom: 0;
 }

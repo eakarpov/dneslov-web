@@ -1,3 +1,4 @@
+"use client";
 import {memo} from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -18,6 +19,13 @@ const Navbar = () => {
                 <Link href="/gallery">Галерея</Link>
                 <Link href="/rites">Чины</Link>
                 <Link href="/about">О проекте</Link>
+                <button
+                    type="button"
+                    className="navbar-tour"
+                    onClick={() => document.dispatchEvent(new CustomEvent("dneslov:tour"))}
+                >
+                    Знакомство
+                </button>
             </nav>
             <a href="https://dneslov.org" className="navbar-legacy-link">
                 Старая версия сайта

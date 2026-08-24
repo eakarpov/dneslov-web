@@ -2,6 +2,7 @@ import {memo} from "react";
 import Link from "next/link";
 import {IRite} from "../../../dto/rite";
 import "../../common/content.scss";
+import Markdown from "../../../lib/markdown";
 
 interface RitePageProps {
     rite?: IRite;
@@ -29,9 +30,7 @@ const RitePage = ({ rite }: RitePageProps) => {
             {rite.description && (
                 <p className="content-description">{rite.description}</p>
             )}
-            {rite.text && (
-                <div className="content-description">{rite.text}</div>
-            )}
+            <Markdown source={rite.text} className="content-description" />
         </div>
     );
 };

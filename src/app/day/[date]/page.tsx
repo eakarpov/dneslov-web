@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Navbar from "../../common/Navbar";
 import DayView from "../DayView";
 import {
     churchTodayISO,
@@ -51,17 +50,12 @@ export default function DayPage({ params, searchParams }: PageProps) {
     }
 
     return (
-        <div>
-            <Navbar />
-            <main className="flex m-4">
-                <Suspense fallback={<div>Загрузка...</div>}>
-                    <DayView
-                        date={date}
-                        query={searchParams.q ?? ""}
-                        calendaries={readCalendaries(searchParams.c)}
-                    />
-                </Suspense>
-            </main>
-        </div>
+        <Suspense fallback={<div>Загрузка...</div>}>
+            <DayView
+                date={date}
+                query={searchParams.q ?? ""}
+                calendaries={readCalendaries(searchParams.c)}
+            />
+        </Suspense>
     );
 }

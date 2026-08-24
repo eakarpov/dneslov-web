@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.scss";
 import StoreProvider from "./StoreProvider";
+import Navbar from "./common/Navbar";
 
 const inter = Inter({ subsets: ["cyrillic-ext"] });
 
@@ -38,7 +39,12 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <body className={inter.className}>
-        <StoreProvider>{children}</StoreProvider>
+        <StoreProvider>
+          {/* Chrome lives here so every page — including error.tsx and
+              not-found.tsx — keeps its navigation. */}
+          <Navbar />
+          <main className="flex m-4">{children}</main>
+        </StoreProvider>
       </body>
     </html>
   );

@@ -1,6 +1,5 @@
 import { fetchLegacyJson } from "../../../../../lib/api/host";
 import { IGalleryList } from "../../../../../dto/gallery";
-import { swallowOutage } from "../../../../../lib/api/load";
 
 export const getEventGallery = async (
     slug: string,
@@ -13,5 +12,5 @@ export const getEventGallery = async (
             Range: `records=${from}-${to}`,
         },
         next: { revalidate: 3600 },
-    }).catch(swallowOutage);
+    });
 };

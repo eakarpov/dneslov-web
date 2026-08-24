@@ -1,7 +1,9 @@
 'use client';
-import {memo, useCallback, useMemo, useState} from "react";
+import {memo, useCallback, useEffect, useMemo, useState} from "react";
 import Link from "next/link";
 import Chip from "../../components/Chip";
+import Markdown from "../../../lib/markdown";
+import {readPreferences} from "../../../lib/preferences";
 import AudioPlayer from "../../components/AudioPlayer";
 import {IMemory} from "../../../dto/memory";
 import {getDescribedMemoes, getExternalLinks, getHappenedAt, getOrder} from "./selectors";
@@ -17,11 +19,45 @@ const LINK_LABELS: Record<string, string> = {
 
 interface MemoryPageProps {
     item?: IMemory;
-    unavailable?: boolean;
 }
 
-const MemoryPage = ({ item, unavailable }: MemoryPageProps) => {
+const MemoryPage = ({ item: canonical }: MemoryPageProps) => {
     const [playingAudioUrl, setPlayingAudioUrl] = useState<string>("");
+    // The page is server-rendered in the site's default calendary context so it
+    // stays one cacheable, indexable document. If the reader has picked their
+    // own calendaries, we fetch the same memory in that context after mount and
+    // let them switch between the two views.
+    const [personal, setPersonal] = useState<IMemory | null>(null);
+    const [showPersonal, setShowPersonal] = useState(true);
+    const [context, setContext] = useState<string[] | null>(null);
+
+    useEffect(() => {
+        const slug = canonical?.slug;
+        const calendaries = readPreferences().calendaries;
+
+        setPersonal(null);
+        setContext(null);
+
+        if (!slug || !calendaries?.length) return;
+
+        let cancelled = false;
+        const params = new URLSearchParams({ slug, c: calendaries.join(",") });
+
+        fetch(`/api/v1/memory?${params}`)
+            .then((res) => res.json())
+            .then((data: IMemory | null) => {
+                if (cancelled || !data) return;
+                setPersonal(data);
+                setContext(calendaries);
+            })
+            .catch(() => undefined);
+
+        return () => {
+            cancelled = true;
+        };
+    }, [canonical?.slug]);
+
+    const item = showPersonal && personal ? personal : canonical;
 
     const onActivePlay = useCallback((url: string) => {
         setPlayingAudioUrl(url);
@@ -36,15 +72,23 @@ const MemoryPage = ({ item, unavailable }: MemoryPageProps) => {
     if (!item) {
         return (
             <div className="flex flex-col memory-page">
-                {unavailable
-                    ? "Справочник сейчас не отвечает. Попробуйте обновить страницу."
-                    : "Память не найдена"}
+                Память не найдена
             </div>
         );
     }
 
     return (
         <div className="flex flex-col w-full memory-page">
+            {personal && context && (
+                <div className="memory-context-note">
+                    {showPersonal
+                        ? `Показано по вашей выборке календарей: ${context.join(", ")}.`
+                        : "Показан общий вид."}
+                    <button type="button" onClick={() => setShowPersonal((on) => !on)}>
+                        {showPersonal ? "Показать общий вид" : "Вернуть мою выборку"}
+                    </button>
+                </div>
+            )}
             <div className="memory-header">
                 <Chip text={order} className="order" />
                 <div className="memory-title">
@@ -99,12 +143,12 @@ const MemoryPage = ({ item, unavailable }: MemoryPageProps) => {
             {describedMemoes.length > 0 ? (
                 <div className="memory-section">
                     {describedMemoes.map((memo) => (
-                        <p key={memo.id} className="memory-description">{memo.description}</p>
+                        <Markdown key={memo.id} source={memo.description} className="memory-description" />
                     ))}
                 </div>
             ) : item.description && (
                 <div className="memory-section">
-                    <p className="memory-description">{item.description}</p>
+                    <Markdown source={item.description} className="memory-description" />
                 </div>
             )}
 
@@ -122,7 +166,7 @@ const MemoryPage = ({ item, unavailable }: MemoryPageProps) => {
                                     />
                                 )}
                             </div>
-                            <div className="scriptum-text">{scriptum.text}</div>
+                            <Markdown source={scriptum.text} className="scriptum-text" />
                         </div>
                     ))}
                 </div>

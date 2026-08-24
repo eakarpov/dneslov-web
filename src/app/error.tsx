@@ -8,15 +8,17 @@ export default function Error({ error, reset }: { error: Error; reset: () => voi
     }, [error]);
 
     return (
-        <main className="flex flex-col m-4">
+        <div className="flex flex-col">
             <h1>Не удалось загрузить страницу</h1>
             {/* The legacy backend goes silent fairly often — a retry is usually
                 all it takes, so offer it before anything else. */}
             <p>Возможно, справочник временно недоступен. Попробуйте ещё раз.</p>
-            <button type="button" onClick={reset}>
-                Повторить
-            </button>
+            <div>
+                <button type="button" onClick={reset}>
+                    Повторить
+                </button>
+            </div>
             <Link href="/">На сегодняшний день</Link>
-        </main>
+        </div>
     );
 }

@@ -1,6 +1,7 @@
 import {memo} from "react";
 import Link from "next/link";
 import {IGalleryImageDetail} from "../../../dto/gallery";
+import Markdown from "../../../lib/markdown";
 import "../../common/content.scss";
 import "../../components/GalleryGrid/styles.scss";
 
@@ -21,9 +22,7 @@ const ImagePage = ({ image }: ImagePageProps) => {
         <div className="flex flex-col w-full content-page">
             {image.title && <div className="content-title">{image.title}</div>}
             <img src={image.url} alt={image.title || ''} className="gallery-image-full" referrerPolicy="no-referrer" />
-            {image.description && (
-                <p className="content-description">{image.description}</p>
-            )}
+            <Markdown source={image.description} className="content-description" />
             {image.attitudes_to?.length > 0 && (
                 <div className="content-section">
                     <div className="content-section-title">Относится к</div>

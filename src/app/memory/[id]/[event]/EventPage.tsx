@@ -5,16 +5,16 @@ import Chip from "../../../components/Chip";
 import AudioPlayer from "../../../components/AudioPlayer";
 import {IEvent} from "../../../../dto/event";
 import {getEventTitle} from "../../../../lib/events";
+import Markdown from "../../../../lib/markdown";
 import {getScriptumTitle, sortScripta} from "../../../../lib/liturgical";
 import "../../../common/content.scss";
 
 interface EventPageProps {
     event?: IEvent;
     memorySlug: string;
-    unavailable?: boolean;
 }
 
-const EventPage = ({ event, memorySlug, unavailable }: EventPageProps) => {
+const EventPage = ({ event, memorySlug }: EventPageProps) => {
     const [playingAudioUrl, setPlayingAudioUrl] = useState<string>("");
 
     const onActivePlay = useCallback((url: string) => {
@@ -27,9 +27,7 @@ const EventPage = ({ event, memorySlug, unavailable }: EventPageProps) => {
     if (!event) {
         return (
             <div className="flex flex-col content-page">
-                {unavailable
-                    ? "Справочник сейчас не отвечает. Попробуйте обновить страницу."
-                    : "Событие не найдено"}
+                Событие не найдено
             </div>
         );
     }
@@ -46,7 +44,7 @@ const EventPage = ({ event, memorySlug, unavailable }: EventPageProps) => {
 
             {event.description && (
                 <div className="content-section">
-                    <p className="content-description">{event.description}</p>
+                    <Markdown source={event.description} className="content-description" />
                 </div>
             )}
 
@@ -64,7 +62,7 @@ const EventPage = ({ event, memorySlug, unavailable }: EventPageProps) => {
                                     />
                                 )}
                             </div>
-                            <div className="scriptum-text">{scriptum.text}</div>
+                            <Markdown source={scriptum.text} className="scriptum-text" />
                         </div>
                     ))}
                 </div>

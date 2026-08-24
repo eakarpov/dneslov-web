@@ -1,6 +1,5 @@
 import {Metadata} from "next";
 import {memo, Suspense} from "react";
-import Navbar from "../../../common/Navbar";
 import {getEvent} from "./api";
 import Content from "./Content";
 import {getEventTitle} from "../../../../lib/events";
@@ -13,11 +12,7 @@ interface PageParams {
 }
 
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
-    const { data: event, unavailable } = await getEvent(params.id, params.event);
-
-    if (unavailable) {
-        return { title: "Справочник недоступен — Днеслов", robots: { index: false } };
-    }
+    const event = await getEvent(params.id, params.event);
 
     if (!event) {
         return { title: "Событие не найдено — Днеслов" };
@@ -41,14 +36,9 @@ const EventRoutePage = ({ params }: PageParams) => {
     const eventPromise = getEvent(params.id, params.event);
 
     return (
-        <div>
-            <Navbar />
-            <main className="flex m-4">
-                <Suspense fallback={<div>Загрузка...</div>}>
-                    <Content eventPromise={eventPromise} memorySlug={params.id} />
-                </Suspense>
-            </main>
-        </div>
+        <Suspense fallback={<div>Загрузка...</div>}>
+            <Content eventPromise={eventPromise} memorySlug={params.id} />
+        </Suspense>
     );
 };
 

@@ -32,8 +32,18 @@
   color: white;
 }
 
-.navbar-links a:hover {
+.navbar-links a:hover,
+.navbar-tour:hover {
   text-decoration: underline;
+}
+
+.navbar-tour {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
 }
 
 .navbar-legacy-link {
