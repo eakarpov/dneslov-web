@@ -1,5 +1,7 @@
 .fast-line {
-  margin-top: 6px;
+  // Flush against the calendar bar above it; the gap before the calendary
+  // chips comes from the calendar wrapper's own bottom padding.
+  margin-top: 0;
   padding: 0.35rem 0.6rem;
   border-radius: 0.35rem;
   background: var(--note-bg);

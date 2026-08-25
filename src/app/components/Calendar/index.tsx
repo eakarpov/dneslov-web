@@ -21,6 +21,7 @@ import {
     toDate,
 } from "../../../lib/dates/civil";
 import { DEFAULT_PREFERENCES, readPreferences, writePreferences } from "../../../lib/preferences";
+import FastLine from "../FastLine";
 
 const isSundayFirst = true;
 
@@ -257,6 +258,16 @@ const Calendar = ({ filters, defaultCalendaries, calendaries }: CalendarProps) =
                     <Cog6ToothIcon />
                 </div>
             </div>
+            {/* Part of the calendar block: it says what the coloured cells above
+                mean, so it sits flush under them rather than floating between
+                the calendar and the calendary chips. */}
+            {filters.date && (
+                <FastLine
+                    date={filters.date}
+                    isJul={isJul}
+                    fastDays={currentCalendar?.meta?.fast_days}
+                />
+            )}
         </div>
     );
 };

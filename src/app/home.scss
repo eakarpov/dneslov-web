@@ -169,10 +169,11 @@
 }
 
 // min-width:0 is what lets the ellipsis work inside a flex child.
-// The title gets the free space and the event chip yields to it — a row whose
-// name is cut to "Память ..." while the chip keeps its full width is useless.
+// The title takes only the width it needs, so the event chip sits right after
+// the name instead of being pushed to the far edge of the row. When the name is
+// too long it is the name that gives way, not the chip.
 .home-row-title {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-width: 4rem;
   white-space: nowrap;
   overflow: hidden;
@@ -180,7 +181,7 @@
 }
 
 .chip.event {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -219,7 +220,10 @@
 }
 
 @media (max-width: 900px) {
+  // On a phone the row is too narrow for both to keep their full width, so
+  // there the chip gives way too.
   .chip.event {
+    flex: 0 1 auto;
     max-width: 40%;
   }
 

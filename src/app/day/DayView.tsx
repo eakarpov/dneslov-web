@@ -5,7 +5,6 @@ import Calendar from "../components/Calendar/index";
 import SourceList from "../components/SourceList/index";
 import DayList from "./DayList";
 import Tour from "../components/Tour";
-import FastLine from "../components/FastLine";
 
 export interface DayViewProps {
     date: DateParts | null;
@@ -44,16 +43,6 @@ const DayView = async ({ date, query, calendaries: requested }: DayViewProps) =>
                     defaultCalendaries={defaultCalendaries}
                     calendaries={calendaries}
                 />
-                {date && (
-                    <FastLine
-                        date={date}
-                        fastDays={
-                            calendaries.find((calendary) =>
-                                filters.calendaries.includes(calendary.slug?.text),
-                            )?.meta?.fast_days
-                        }
-                    />
-                )}
                 <SourceList
                     items={calendaries}
                     total={calendariesTotal}
