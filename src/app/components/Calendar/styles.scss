@@ -120,22 +120,10 @@
     flex-direction: row;
 }
 
-.calendar-day-is-today {
-    background: var(--day-today);
-}
-
-.calendar-day-is-fasting {
-    background: var(--day-fast);
-}
-
-.calendar-day-is-easter {
-    background: var(--day-easter);
-}
-
-.calendar-day-not-current-month {
-    color: var(--text-faint);
-}
-
+// Base cell first, state colours after it. These are all single-class
+// selectors, so whichever comes last wins: with the base rule below, its
+// "background: none" (needed to strip the button's own chrome) silently wiped
+// the fasting, Pascha and today colours.
 .calendar-day {
     // Cells share the row evenly instead of being pinned to 40px, so the grid
     // fits a phone without overflowing.
@@ -162,6 +150,22 @@
     & > .secondary {
         font-size: 8px;
     }
+}
+
+.calendar-day-is-today {
+    background: var(--day-today);
+}
+
+.calendar-day-is-fasting {
+    background: var(--day-fast);
+}
+
+.calendar-day-is-easter {
+    background: var(--day-easter);
+}
+
+.calendar-day-not-current-month {
+    color: var(--text-faint);
 }
 
 // The selected day always shows as a circle around the day number, layered on top of
